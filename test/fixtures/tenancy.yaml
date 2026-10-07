@@ -1,0 +1,179 @@
+# Tenancy — KAI Resource Management objects for a small sample cluster: one
+# node pool, one department, three projects. KRM turns these into KAI
+# SchedulingShards and Queues; nothing below is hand-written KAI.
+#
+# Semantics (KRM docs v0.18.2):
+# - A NodePool is a set of WHOLE nodes selected by one label pair. The pair
+#   is IMMUTABLE after creation: to change it, make a new pool. A pool
+#   creates a scheduler shard of the same name.
+# - ManagedNodesConfig is a WHITELIST. Nodes that do not match go to a
+#   reserved pool no shard serves: KAI cannot place anything on them. That is
+#   how nodes that are not meant for KAI stay outside it — structural, not
+#   a warn-only policy.
+# - KRM WRITES TO NODES: a pool label on every node, and it CORDONS a node
+#   that still runs a kai-scheduled pod of a different pool. Only pods
+#   naming kai-scheduler count; default-scheduler pods never do.
+#   Create these objects while no kai-scheduled pod is running, and never
+#   re-target a pool under running tenants.
+# - Quota fields DEFAULT TO 0, and 0 is a ceiling of zero. Every queue
+#   states gpu, cpu and memory. cpu/memory are -1 (unlimited) here: KAI
+#   lets a non-preemptible workload use in-quota resources only, for every
+#   resource, so a cpu quota of 0 would stop workloads scheduling at all.
+#   KRM copies deserved/limit straight into the Queue's quota/limit.
+# - Queue names are given explicitly. They are cluster-wide: two objects
+#   that name the same queue share one queue, so each name here carries
+#   its owner and its pool (platform-rtx, workspace-rtx, benchmark-rtx,
+#   kai-verify-rtx).
+# - No queue for the chart's `default` pool, on purpose.
+#
+# Sync: these CRDs arrive with the chart in the same sync, hence
+# SkipDryRunOnMissingResource; waves order pool -> whitelist -> tenants.
+# Argo CD never prunes them (app prune: false): removing one of these
+# objects is a manual step, taken on purpose, and never a side effect of
+# a file being deleted from the repository.
+---
+# The RTX server's pool. labelValue is fixed for good: the label is set on
+# the GPU nodes outside this file, one value per hardware class, so a
+# second class of GPU server later is one more NodePool object, not a
+# relabel of this one.
+apiVersion: kai.resources/v1alpha1
+kind: NodePool
+metadata:
+  name: rtx-pro-6000
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  labelKey: example.com/gpu-class
+  labelValue: rtx-pro-6000
+  # Scheduler shard settings for this pool: GPU binpack (fill a card's
+  # node before spreading — one node today, so moot; stated so the next
+  # pool copies or changes it deliberately).
+  schedulingShardConfig:
+    placementStrategy:
+      gpu: binpack
+      cpu: spread
+---
+# Whitelist. The name is fixed: only this singleton is reconciled. Note the
+# field is `inclusion_criteria` (underscore) — a camelCase key is silently
+# ignored and every node stays eligible.
+apiVersion: kai.resources/v1alpha1
+kind: ManagedNodesConfig
+metadata:
+  name: kai-managed-nodes-config
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  inclusion_criteria:
+    nodeSelectorTerms:
+      - matchExpressions:
+          - key: example.com/gpu-class
+            operator: In
+            values: [rtx-pro-6000]   # add the next pool's label value here when that pool is created
+---
+# The department. One today: the department holds the guarantee, and the
+# namespaces that draw on it are the Projects below. Its queue on this
+# pool covers the whole RTX server: 4 cards guaranteed, 4 cards as the
+# ceiling.
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: platform
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: platform-rtx
+      nodepool: rtx-pro-6000
+      resources:
+        gpu:    {deserved: 4,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+---
+# The cluster's own probe tenant: a verification script runs its test pods
+# here. The Project adopts the existing namespace — KRM creates none
+# (projectController features off). gpu deserved 0 / limit 1: the GPU
+# probe runs preemptible on an idle card and never competes with a
+# workspace.
+# enforceKaiScheduler is false: only pods that name kai-scheduler are
+# managed; pods on the default scheduler are left alone.
+# workspace and benchmark below are Projects of the same shape. Adopting a
+# namespace puts KRM's fail-closed webhooks in front of every pod create
+# there, which is why they were adopted after this one.
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: kai-verify
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: kai-verify
+  parent: platform
+  enforceKaiScheduler: false
+  defaultNodePools: [rtx-pro-6000]
+  queues:
+    - name: kai-verify-rtx
+      nodepool: rtx-pro-6000
+      priority: 100
+      resources:
+        gpu:    {deserved: 0,  limit: 1,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+---
+# The two tenant namespaces. Workspaces are guaranteed three cards and are
+# never evicted (priority >= 100 = non-preemptible, in-quota only).
+# Benchmark Jobs are guaranteed one card, run over-quota on idle cards
+# beyond it, and are RECLAIMED when a workspace needs one. Each namespace
+# declares its kai/project label itself. enforceKaiScheduler is false:
+# CPU-only workspaces stay on the default scheduler and are not managed
+# by KAI.
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: workspace
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: workspace
+  parent: platform
+  enforceKaiScheduler: false
+  defaultNodePools: [rtx-pro-6000]
+  queues:
+    - name: workspace-rtx
+      nodepool: rtx-pro-6000
+      priority: 100
+      resources:
+        # 3 of the 4 cards (was 4/4): one card is benchmark's guaranteed share.
+        # Workspaces run in-quota only, so limit 3 is the honest number — they
+        # never borrow the fourth card.
+        gpu:    {deserved: 3,  limit: 3,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: benchmark
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: benchmark
+  parent: platform
+  enforceKaiScheduler: false
+  defaultNodePools: [rtx-pro-6000]
+  queues:
+    - name: benchmark-rtx
+      nodepool: rtx-pro-6000
+      priority: 50
+      resources:
+        # ALWAYS one whole card (deserved 1; was 0 = idle capacity only), and
+        # up to all 4 when workspaces leave cards idle — that over-quota part
+        # is reclaimed when workspace needs its 3.
+        gpu:    {deserved: 1,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}

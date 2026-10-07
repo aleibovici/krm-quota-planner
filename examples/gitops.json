@@ -1,0 +1,20 @@
+{
+  "source": "git",
+  "repo": "../example-gitops",
+  "ref": "origin/main",
+  "tenancy": "services/kai-scheduler/manifests/tenancy.yaml",
+  "expectations": {
+    "file": "services/kai-scheduler/scripts/env.sh",
+    "variables": ["PHASE1_PROJECTS", "TENANT_PROJECTS", "DEPT_QUEUE"]
+  },
+  "resourceQuotaMirrors": [
+    { "queue": "workspace-rtx", "file": "services/coder/manifests/workspace-quota.yaml", "key": "requests.nvidia.com/gpu" },
+    { "queue": "benchmark-rtx", "file": "services/benchmarking/manifests/resource-quota.yaml", "key": "requests.nvidia.com/gpu" }
+  ],
+  "reminders": [
+    "services/kai-scheduler/CHANGELOG.md — one entry describing the quota change",
+    "deployed.md — rows that quote the queue numbers"
+  ],
+  "cpuMemoryNote": "services/kai-scheduler/scripts/verify.sh asserts cpu and memory are unlimited (-1/-1) on every queue; this change makes that check fail until verify.sh is updated in the same PR",
+  "commitPrefix": "kai-scheduler"
+}

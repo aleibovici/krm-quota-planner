@@ -1,0 +1,8 @@
+node_modules/
+*.patch
+.DS_Store
+/test-results/
+/playwright-report/
+/blob-report/
+/e2e/.fixture-env.json
+planner.config.json

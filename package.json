@@ -1,0 +1,26 @@
+{
+  "name": "krm-quota-planner",
+  "version": "0.1.0",
+  "description": "Visual planner for KAI Resource Management (KRM) GPU quotas: reads the Departments and Projects from the live cluster or a GitOps repository, lets you rebalance who gets what and add departments, projects, queues and node pools, and hands back kubectl commands or a local commit.",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "git+https://github.com/aleibovici/krm-quota-planner.git" },
+  "homepage": "https://github.com/aleibovici/krm-quota-planner#readme",
+  "bugs": { "url": "https://github.com/aleibovici/krm-quota-planner/issues" },
+  "type": "module",
+  "bin": { "quota-planner": "bin/quota-planner.js" },
+  "scripts": {
+    "start": "node bin/quota-planner.js",
+    "test": "node --test 'test/**/*.test.js'",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e",
+    "demo:generate": "node scripts/generate-demo-fixture.mjs large",
+    "demo": "node bin/run-demo.mjs large"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0"
+  }
+}

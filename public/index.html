@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="planner-token" content="__PLANNER_TOKEN__">
+  <title>GPU quota planner</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='4' fill='%23111418'/%3E%3Crect x='3' y='4' width='5.5' height='8' rx='1' fill='%23fff'/%3E%3Crect x='10' y='4' width='3' height='8' rx='1' fill='%23fff' opacity='.5'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="appbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"><i></i><i></i></span>
+      <div>
+        <h1>GPU quota planner</h1>
+        <p>KAI Resource Management</p>
+      </div>
+    </div>
+    <dl class="status" id="status"></dl>
+    <div class="appbar-actions">
+      <button type="button" class="icon-btn" id="theme" aria-label="Switch between light and dark"></button>
+      <button type="button" class="btn" id="reload" title="Read the source and the cluster again. Your edits are kept.">Reload</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner" role="status" hidden></div>
+
+  <main id="main">
+    <div id="left">
+      <nav id="overview" aria-label="Every node pool at a glance" hidden></nav>
+      <div class="browse-bar">
+        <input type="search" id="browse-filter" placeholder="Filter pools, departments, projects" aria-label="Filter pools, departments, and projects">
+        <button type="button" class="btn small" id="only-issues" aria-pressed="false" title="Show only the pools and departments something is wrong with">Only issues</button>
+        <button type="button" class="btn small" id="expand-all">Expand all</button>
+        <button type="button" class="btn small" id="collapse-all">Collapse all</button>
+        <button type="button" class="btn small" id="toggle-advanced" aria-pressed="false">Weight &amp; priority</button>
+      </div>
+      <section id="pools" aria-label="Node pools"><p class="loading">Reading the tenancy…</p></section>
+      <p class="browse-note" id="no-match" hidden>Nothing matches that filter.</p>
+      <p class="browse-note" id="no-issues">Nothing is over: every guarantee fits its limit, its department and its pool.</p>
+
+      <section class="card" id="add-panel">
+        <div class="card-head">
+          <div>
+            <h2>Add to the plan</h2>
+            <p class="hint">Anything you add is checked and shown in the diff like any other change. It only exists once you apply or merge the result.</p>
+          </div>
+        </div>
+        <div class="actions" id="add-kinds"></div>
+      </section>
+    </div>
+
+    <aside id="side" aria-label="The plan">
+      <header class="plan-head">
+        <h2>Plan</h2>
+        <span class="pill" id="plan-state"></span>
+        <button type="button" class="icon-btn" id="hide-plan" aria-label="Hide plan panel" title="Hide the plan panel"></button>
+      </header>
+
+      <div class="plan-body">
+        <section class="block">
+          <h3>Checks <span class="count" id="findings-count"></span></h3>
+          <ul class="findings" id="findings"></ul>
+          <details class="notes" id="notes-box" hidden>
+            <summary id="notes-summary"></summary>
+            <ul class="findings" id="notes"></ul>
+          </details>
+        </section>
+
+        <section class="block">
+          <h3>Changes <button type="button" class="link" id="reset-all" hidden>Reset all</button></h3>
+          <ul class="changes" id="changes"></ul>
+        </section>
+
+        <section class="block" id="coupled-panel">
+          <h3>Files that move with it</h3>
+          <div id="coupled"></div>
+        </section>
+
+        <section class="block">
+          <div class="tabs" role="tablist" aria-label="Review">
+            <button type="button" role="tab" id="tab-diff" aria-controls="panel-diff" aria-selected="true">Diff</button>
+            <button type="button" role="tab" id="tab-dry" aria-controls="panel-dry" aria-selected="false">Dry-run</button>
+          </div>
+          <div role="tabpanel" id="panel-diff" aria-labelledby="tab-diff">
+            <pre class="diff" id="diff" tabindex="0"></pre>
+            <div class="actions">
+              <button type="button" class="btn small" id="copy-diff" disabled>Copy diff</button>
+              <button type="button" class="btn small" id="download-patch" disabled>Download .patch</button>
+              <button type="button" class="btn small" id="download-tenancy" disabled>Download tenancy.yaml</button>
+            </div>
+          </div>
+          <div role="tabpanel" id="panel-dry" aria-labelledby="tab-dry" hidden>
+            <p class="hint">Asks the API server whether it would accept the planned objects: schema and names. Nothing is stored. It does <em>not</em> check the arithmetic — nothing on the cluster does; the checks above are the only guard.</p>
+            <div class="actions"><button type="button" class="btn small" id="dry-run" disabled>Dry-run on the cluster</button></div>
+            <pre class="output" id="dry-run-output" hidden></pre>
+          </div>
+        </section>
+      </div>
+
+      <footer class="plan-foot">
+        <p id="plan-summary"></p>
+        <div id="apply-panel" hidden>
+          <button type="button" class="btn primary" id="apply" disabled>Show kubectl commands</button>
+        </div>
+        <div id="commit-panel" hidden>
+          <button type="button" class="btn primary" id="commit-open" disabled>Review and commit</button>
+        </div>
+      </footer>
+    </aside>
+  </main>
+
+  <dialog class="modal" id="add-dialog" aria-label="Add to the plan">
+    <form id="add-form" autocomplete="off"></form>
+  </dialog>
+
+  <dialog class="modal wide" id="apply-dialog" aria-labelledby="apply-title">
+    <header class="modal-head">
+      <h2 id="apply-title">Apply to the cluster</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close"></button>
+    </header>
+    <p class="hint">This page does not write to the cluster. It gives you the commands: one <code>kubectl patch</code> per changed object, each of which refuses if the value it replaces is no longer the one read here, and one <code>kubectl create</code> per new object, which refuses if the name has been taken.</p>
+    <div class="output" id="apply-output" hidden></div>
+  </dialog>
+
+  <dialog class="modal" id="commit-dialog" aria-labelledby="commit-title">
+    <header class="modal-head">
+      <h2 id="commit-title">Commit to a new branch</h2>
+      <button type="button" class="icon-btn" data-close aria-label="Close"></button>
+    </header>
+    <p class="hint">Creates a new local branch from the commit this page was read at, containing only these files. Your checkout is not touched and nothing is pushed.</p>
+    <label class="field">Branch <input type="text" id="branch" name="branch" spellcheck="false" autocomplete="off"></label>
+    <label class="field">Message <textarea id="message" name="message" rows="10" spellcheck="false"></textarea></label>
+    <div class="actions end"><button type="button" class="btn primary" id="commit" disabled>Create local commit</button></div>
+    <div class="output" id="commit-output" hidden></div>
+  </dialog>
+
+  <dialog class="modal narrow" id="confirm-dialog" aria-labelledby="confirm-title">
+    <h2 id="confirm-title"></h2>
+    <p class="hint" id="confirm-body"></p>
+    <div class="actions end">
+      <button type="button" class="btn" id="confirm-cancel">Cancel</button>
+      <button type="button" class="btn primary" id="confirm-ok"></button>
+    </div>
+  </dialog>
+
+  <button type="button" class="btn primary" id="show-plan">Show plan</button>
+
+  <div id="tip" role="tooltip" hidden></div>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

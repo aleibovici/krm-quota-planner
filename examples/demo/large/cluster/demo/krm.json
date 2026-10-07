@@ -1,0 +1,1360 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "NodePool",
+      "metadata": {
+        "name": "h100-80gb"
+      },
+      "spec": {
+        "labelKey": "example.com/gpu-class",
+        "labelValue": "h100"
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "NodePool",
+      "metadata": {
+        "name": "a100-80gb"
+      },
+      "spec": {
+        "labelKey": "example.com/gpu-class",
+        "labelValue": "a100"
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-h100-80gb-1"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-gpu",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 24,
+                "limit": 96
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-1-gpu-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 16
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-h100-80gb-2"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-gpu",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 24,
+                "limit": 96
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-2-gpu-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 16
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-h100-80gb-3"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-gpu",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 24,
+                "limit": 96
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-h100-80gb-4"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-gpu",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 24,
+                "limit": 96
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-a100-80gb-1"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-gpu",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 14,
+                "limit": 64
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-a100-80gb-2"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-gpu",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 14,
+                "limit": 64
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-a100-80gb-3"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-gpu",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 14,
+                "limit": 64
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "name": "team-a100-80gb-4"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-gpu",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 14,
+                "limit": 64
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-1"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-1",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-1-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-1-proj-1-q-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 4
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-2"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-2",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-2-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-1-proj-2-q-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 4
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-3"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-3",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-3-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-4"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-4",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-4-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-5"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-5",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-5-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-1-proj-6"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-1-proj-6",
+        "parent": "team-h100-80gb-1",
+        "queues": [
+          {
+            "name": "team-h100-80gb-1-proj-6-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-1"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-1",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-1-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-2-proj-1-q-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 4
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-2"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-2",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-2-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          },
+          {
+            "name": "team-h100-80gb-2-proj-2-q-a100",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 4
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-3"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-3",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-3-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-4"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-4",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-4-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-5"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-5",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-5-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-2-proj-6"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-2-proj-6",
+        "parent": "team-h100-80gb-2",
+        "queues": [
+          {
+            "name": "team-h100-80gb-2-proj-6-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-1"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-1",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-1-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-2"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-2",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-2-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-3"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-3",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-3-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-4"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-4",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-4-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-5"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-5",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-5-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-3-proj-6"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-3-proj-6",
+        "parent": "team-h100-80gb-3",
+        "queues": [
+          {
+            "name": "team-h100-80gb-3-proj-6-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-1"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-1",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-1-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-2"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-2",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-2-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-3"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-3",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-3-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-4"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-4",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-4-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-5"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-5",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-5-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-h100-80gb-4-proj-6"
+      },
+      "spec": {
+        "namespace": "team-h100-80gb-4-proj-6",
+        "parent": "team-h100-80gb-4",
+        "queues": [
+          {
+            "name": "team-h100-80gb-4-proj-6-q",
+            "nodepool": "h100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 4,
+                "limit": 10
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-1"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-1",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-1-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-2"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-2",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-2-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-3"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-3",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-3-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-4"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-4",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-4-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-5"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-5",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-5-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-1-proj-6"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-1-proj-6",
+        "parent": "team-a100-80gb-1",
+        "queues": [
+          {
+            "name": "team-a100-80gb-1-proj-6-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-1"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-1",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-1-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-2"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-2",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-2-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-3"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-3",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-3-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-4"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-4",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-4-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-5"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-5",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-5-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-2-proj-6"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-2-proj-6",
+        "parent": "team-a100-80gb-2",
+        "queues": [
+          {
+            "name": "team-a100-80gb-2-proj-6-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-1"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-1",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-1-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-2"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-2",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-2-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-3"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-3",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-3-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-4"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-4",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-4-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-5"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-5",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-5-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-3-proj-6"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-3-proj-6",
+        "parent": "team-a100-80gb-3",
+        "queues": [
+          {
+            "name": "team-a100-80gb-3-proj-6-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-1"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-1",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-1-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-2"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-2",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-2-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 3,
+                "limit": 6
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-3"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-3",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-3-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-4"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-4",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-4-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-5"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-5",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-5-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "name": "team-a100-80gb-4-proj-6"
+      },
+      "spec": {
+        "namespace": "team-a100-80gb-4-proj-6",
+        "parent": "team-a100-80gb-4",
+        "queues": [
+          {
+            "name": "team-a100-80gb-4-proj-6-q",
+            "nodepool": "a100-80gb",
+            "resources": {
+              "gpu": {
+                "deserved": 2,
+                "limit": 5
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

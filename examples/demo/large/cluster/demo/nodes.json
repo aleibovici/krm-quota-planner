@@ -1,0 +1,524 @@
+{
+  "items": [
+    {
+      "metadata": {
+        "name": "h100-80gb-01",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-02",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-03",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-04",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-05",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-06",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-07",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-08",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-09",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-10",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-11",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "h100-80gb-12",
+        "labels": {
+          "example.com/gpu-class": "h100",
+          "nvidia.com/gpu.product": "NVIDIA H100 80GB HBM3",
+          "nvidia.com/gpu.memory": "81559",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-01",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-02",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-03",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-04",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-05",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-06",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-07",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "name": "a100-80gb-08",
+        "labels": {
+          "example.com/gpu-class": "a100",
+          "nvidia.com/gpu.product": "NVIDIA A100 80GB PCIe",
+          "nvidia.com/gpu.memory": "81920",
+          "nvidia.com/gpu.count": "8"
+        }
+      },
+      "spec": {},
+      "status": {
+        "allocatable": {
+          "nvidia.com/gpu": "8"
+        },
+        "capacity": {
+          "nvidia.com/gpu": "8"
+        },
+        "conditions": [
+          {
+            "type": "Ready",
+            "status": "True"
+          }
+        ]
+      }
+    }
+  ]
+}

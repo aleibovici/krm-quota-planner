@@ -1,0 +1,374 @@
+{
+  "apiVersion": "v1",
+  "items": [
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "NodePool",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "Prune=false",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/NodePool:kai-scheduler/default",
+          "helm.sh/resource-policy": "keep"
+        },
+        "creationTimestamp": "2026-10-06T07:15:18Z",
+        "finalizers": [
+          "nodepool.kai.scheduler/finalize"
+        ],
+        "generation": 1,
+        "name": "default",
+        "resourceVersion": "44561028",
+        "uid": "00000000-0000-4000-8000-000000000000"
+      },
+      "spec": {},
+      "status": {
+        "message": "",
+        "phase": "Empty"
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "NodePool",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+          "argocd.argoproj.io/sync-wave": "1",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/NodePool:kai-scheduler/rtx-pro-6000"
+        },
+        "creationTimestamp": "2026-10-06T07:17:21Z",
+        "finalizers": [
+          "nodepool.kai.scheduler/finalize"
+        ],
+        "generation": 1,
+        "name": "rtx-pro-6000",
+        "resourceVersion": "44561076",
+        "uid": "00000000-0000-4000-8000-000000000001"
+      },
+      "spec": {
+        "labelKey": "example.com/gpu-class",
+        "labelValue": "rtx-pro-6000",
+        "schedulingShardConfig": {
+          "placementStrategy": {
+            "cpu": "spread",
+            "gpu": "binpack"
+          }
+        }
+      },
+      "status": {
+        "message": "",
+        "nodes": [
+          {
+            "name": "gpu-node-01",
+            "status": "Ready"
+          }
+        ],
+        "phase": "Ready"
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Department",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+          "argocd.argoproj.io/sync-wave": "2",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/Department:kai-scheduler/platform"
+        },
+        "creationTimestamp": "2026-10-06T07:17:24Z",
+        "finalizers": [
+          "kai.resources.finalizers.department"
+        ],
+        "generation": 1,
+        "name": "platform",
+        "resourceVersion": "43594589",
+        "uid": "00000000-0000-4000-8000-000000000002"
+      },
+      "spec": {
+        "queues": [
+          {
+            "name": "platform-rtx",
+            "nodepool": "rtx-pro-6000",
+            "resources": {
+              "cpu": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              },
+              "gpu": {
+                "deserved": 4,
+                "limit": 4,
+                "overQuotaWeight": 1
+              },
+              "memory": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+          "argocd.argoproj.io/sync-wave": "3",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/Project:kai-scheduler/workspace"
+        },
+        "creationTimestamp": "2026-10-06T20:31:50Z",
+        "finalizers": [
+          "kai.resources.finalizers.project"
+        ],
+        "generation": 2,
+        "name": "workspace",
+        "resourceVersion": "44635025",
+        "uid": "00000000-0000-4000-8000-000000000003"
+      },
+      "spec": {
+        "defaultNodePools": [
+          "rtx-pro-6000"
+        ],
+        "enforceKaiScheduler": false,
+        "namespace": "workspace",
+        "parent": "platform",
+        "queues": [
+          {
+            "name": "workspace-rtx",
+            "nodepool": "rtx-pro-6000",
+            "priority": 100,
+            "resources": {
+              "cpu": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              },
+              "gpu": {
+                "deserved": 3,
+                "limit": 3,
+                "overQuotaWeight": 1
+              },
+              "memory": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              }
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-06T20:31:50Z",
+            "status": "True",
+            "type": "NamespaceReady"
+          },
+          {
+            "lastTransitionTime": "2026-10-06T20:31:50Z",
+            "status": "True",
+            "type": "QueuesReady"
+          }
+        ],
+        "message": "",
+        "namespace": "workspace",
+        "nodePoolsQuotaStatuses": [
+          {
+            "nodePoolName": "rtx-pro-6000",
+            "queueStatus": {
+              "allocated": {
+                "cpu": "16",
+                "memory": "32Gi",
+                "nvidia.com/gpu": "119995506n"
+              },
+              "allocatedNonPreemptible": {
+                "cpu": "16",
+                "memory": "32Gi",
+                "nvidia.com/gpu": "119995506n"
+              },
+              "requested": {
+                "cpu": "16",
+                "memory": "32Gi",
+                "run.ai/gpu.memory": "11746Mi"
+              }
+            }
+          }
+        ],
+        "phase": "Ready",
+        "quotaStatus": {
+          "allocated": {
+            "cpu": "16",
+            "memory": "32Gi",
+            "nvidia.com/gpu": "119995506n"
+          },
+          "allocatedNonPreemptible": {
+            "cpu": "16",
+            "memory": "32Gi",
+            "nvidia.com/gpu": "119995506n"
+          },
+          "requested": {
+            "cpu": "16",
+            "memory": "32Gi",
+            "nvidia.com/gpu": "120m",
+            "run.ai/gpu.memory": "11746Mi"
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+          "argocd.argoproj.io/sync-wave": "3",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/Project:kai-scheduler/kai-verify"
+        },
+        "creationTimestamp": "2026-10-06T07:17:27Z",
+        "finalizers": [
+          "kai.resources.finalizers.project"
+        ],
+        "generation": 1,
+        "name": "kai-verify",
+        "resourceVersion": "44655368",
+        "uid": "00000000-0000-4000-8000-000000000004"
+      },
+      "spec": {
+        "defaultNodePools": [
+          "rtx-pro-6000"
+        ],
+        "enforceKaiScheduler": false,
+        "namespace": "kai-verify",
+        "parent": "platform",
+        "queues": [
+          {
+            "name": "kai-verify-rtx",
+            "nodepool": "rtx-pro-6000",
+            "priority": 100,
+            "resources": {
+              "cpu": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              },
+              "gpu": {
+                "deserved": 0,
+                "limit": 1,
+                "overQuotaWeight": 1
+              },
+              "memory": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              }
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-06T07:48:25Z",
+            "status": "True",
+            "type": "NamespaceReady"
+          },
+          {
+            "lastTransitionTime": "2026-10-06T07:17:27Z",
+            "status": "True",
+            "type": "QueuesReady"
+          }
+        ],
+        "message": "",
+        "namespace": "kai-verify",
+        "nodePoolsQuotaStatuses": [
+          {
+            "nodePoolName": "rtx-pro-6000",
+            "queueStatus": {}
+          }
+        ],
+        "phase": "Ready",
+        "quotaStatus": {}
+      }
+    },
+    {
+      "apiVersion": "kai.resources/v1alpha1",
+      "kind": "Project",
+      "metadata": {
+        "annotations": {
+          "argocd.argoproj.io/sync-options": "SkipDryRunOnMissingResource=true",
+          "argocd.argoproj.io/sync-wave": "3",
+          "argocd.argoproj.io/tracking-id": "kai-scheduler:kai.resources/Project:kai-scheduler/benchmark"
+        },
+        "creationTimestamp": "2026-10-06T20:31:50Z",
+        "finalizers": [
+          "kai.resources.finalizers.project"
+        ],
+        "generation": 2,
+        "name": "benchmark",
+        "resourceVersion": "44635021",
+        "uid": "00000000-0000-4000-8000-000000000005"
+      },
+      "spec": {
+        "defaultNodePools": [
+          "rtx-pro-6000"
+        ],
+        "enforceKaiScheduler": false,
+        "namespace": "benchmark",
+        "parent": "platform",
+        "queues": [
+          {
+            "name": "benchmark-rtx",
+            "nodepool": "rtx-pro-6000",
+            "priority": 50,
+            "resources": {
+              "cpu": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              },
+              "gpu": {
+                "deserved": 1,
+                "limit": 4,
+                "overQuotaWeight": 1
+              },
+              "memory": {
+                "deserved": -1,
+                "limit": -1,
+                "overQuotaWeight": 1
+              }
+            }
+          }
+        ]
+      },
+      "status": {
+        "conditions": [
+          {
+            "lastTransitionTime": "2026-10-06T20:31:50Z",
+            "status": "True",
+            "type": "NamespaceReady"
+          },
+          {
+            "lastTransitionTime": "2026-10-06T20:31:50Z",
+            "status": "True",
+            "type": "QueuesReady"
+          }
+        ],
+        "message": "",
+        "namespace": "benchmark",
+        "nodePoolsQuotaStatuses": [
+          {
+            "nodePoolName": "rtx-pro-6000",
+            "queueStatus": {}
+          }
+        ],
+        "phase": "Ready",
+        "quotaStatus": {}
+      }
+    }
+  ],
+  "kind": "List",
+  "metadata": {
+    "resourceVersion": ""
+  }
+}

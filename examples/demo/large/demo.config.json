@@ -1,0 +1,12 @@
+{
+  "displayName": "Research cloud (demo)",
+  "ref": "main",
+  "tenancy": "tenancy.yaml",
+  "expectations": {
+    "file": "env.sh",
+    "variables": [
+      "TENANT_PROJECTS"
+    ]
+  },
+  "commitPrefix": "demo-quota"
+}

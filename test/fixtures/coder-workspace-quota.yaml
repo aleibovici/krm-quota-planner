@@ -1,0 +1,59 @@
+# The enforced ceiling for the workspace namespace. Kubernetes is the real
+# limit here: whatever the workspace tooling allows, a pod that would take
+# the namespace past these numbers is refused at creation.
+# The GPU count mirrors the workspace-rtx queue's whole-card limit. A
+# ResourceQuota counts nvidia.com/gpu requests, which fractional pods do
+# not make, so it only bounds whole-card pods. It is a separate decision
+# from the queue and can drift from it — which is what the planner's
+# "files that move with it" check is for.
+# cpu and memory are sized for the node the workspaces run on, with room
+# beside them for that node's other tenants; the LimitRange below caps a
+# single workspace.
+# pods and persistentvolumeclaims are counts, not capacity: they stop a
+# runaway template from filling the namespace with objects.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: workspace
+  namespace: workspace
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  hard:
+    requests.cpu: "64"
+    requests.memory: 512Gi
+    limits.cpu: "64"
+    limits.memory: 512Gi
+    requests.nvidia.com/gpu: "3" # whole cards; mirrors the workspace-rtx queue
+    pods: "40"
+    persistentvolumeclaims: "3"   # home + scratch + one claim being retired; no dynamic PVCs
+---
+# Guaranteed QoS is set by the template (requests == limits); the
+# LimitRange is the backstop so nothing Burstable can slip in by omission,
+# and caps a single workspace below the node.
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: workspace
+  namespace: workspace
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  limits:
+    - type: Container
+      # nvidia.com/gpu is deliberately NOT in this LimitRange. With `max: 1`
+      # and no default, Kubernetes defaults every container without a GPU
+      # limit to ONE card; the obvious fix is a default of "0". But KAI's
+      # admission refuses a fractional pod that carries ANY nvidia.com/gpu,
+      # even "0" ("cannot have both GPU fraction request and whole GPU
+      # resource"), so a default of 0 blocks every fractional workspace, and
+      # a Pod-type `max` refuses pods that specify no limit at all ("No limit
+      # is specified"). A LimitRange cannot say "at most 1 if asked, nothing
+      # otherwise" for this resource.
+      # The one-card-per-workspace ceiling therefore lives in the workspace
+      # template (its only whole-card option is 1, and only the workspace
+      # service account creates pods here); the namespace ceilings are the
+      # ResourceQuota above and KAI's queue.
+      default: {cpu: "2", memory: 4Gi}
+      defaultRequest: {cpu: "2", memory: 4Gi}
+      max: {cpu: "16", memory: 256Gi}

@@ -1,0 +1,19 @@
+# Hard GPU ceiling for the benchmark namespace. enforceKaiScheduler is off
+# and the bypass policy only warns, so a GPU Job that omits schedulerName
+# runs outside every queue — this quota is the only thing that bounds it.
+# 4 = the RTX server's cards, the same as the benchmark-rtx queue's limit.
+# It counts Pending pods too (GPU Jobs beyond four cards' worth are
+# refused at creation, not queued) and is namespace-wide, so it would also
+# cap GPU benchmark pods on any other pool — none exist today; raise it
+# if they appear.
+# A ResourceQuota only counts whole-card requests.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: benchmark-gpu
+  namespace: benchmark
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  hard:
+    requests.nvidia.com/gpu: "4"

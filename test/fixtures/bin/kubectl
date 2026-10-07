@@ -1,0 +1,58 @@
+#!/bin/sh
+# Stand-in for kubectl in tests: answers the reads the planner makes from the
+# files in $FAKE_CLUSTER, so a test can change "the cluster" by rewriting one.
+# A context with a directory of its own there is a different cluster.
+#   krm.json         NodePools, Departments, Projects        (required)
+#   whitelist.json   the ManagedNodesConfig                  (none if absent)
+#   nodes.json       nodes                                   (none if absent)
+#   queues.json      the scheduler's Queues, with usage      (none if absent)
+#   namespaces.json  namespaces                              (not allowed if absent)
+#   krmconfig.json   KRM's own settings                      (not allowed if absent)
+dir="$FAKE_CLUSTER"
+prev=
+for arg in "$@"; do
+  if [ "$prev" = "--context" ] && [ -d "$FAKE_CLUSTER/$arg" ]; then dir="$FAKE_CLUSTER/$arg"; fi
+  prev="$arg"
+done
+have() { if [ -f "$dir/$1" ]; then cat "$dir/$1"; else echo '{"items":[]}'; fi; }
+need() { if [ -f "$dir/$1" ]; then cat "$dir/$1"; else echo "Error from server (Forbidden): cannot list $2" >&2; exit 1; fi; }
+case "$*" in
+  *"config current-context"*)
+    if [ -f "$FAKE_CLUSTER/krm.json" ]; then echo fake-cluster; exit 0; fi
+    for d in "$FAKE_CLUSTER"/*/; do
+      if [ -f "${d}krm.json" ]; then basename "$d"; exit 0; fi
+    done
+    echo fake-cluster ;;
+  *"config get-contexts -o name"*)
+    if [ -f "$FAKE_CLUSTER/krm.json" ]; then
+      echo fake-cluster
+      [ -d "$FAKE_CLUSTER/other-cluster" ] && echo other-cluster
+      [ -d "$FAKE_CLUSTER/broken-cluster" ] && echo broken-cluster
+      exit 0
+    fi
+    listed=
+    for d in "$FAKE_CLUSTER"/*/; do
+      if [ -f "${d}krm.json" ]; then basename "$d"; listed=1; fi
+    done
+    if [ -n "$listed" ]; then exit 0; fi
+    printf 'fake-cluster\nother-cluster\nbroken-cluster\n' ;;
+  *"get nodepools.kai.resources,departments.kai.resources,projects.kai.resources -o json"*) cat "$dir/krm.json" ;;
+  *"get managednodesconfigs.kai.resources -o json"*) have whitelist.json ;;
+  *"get queues.scheduling.run.ai -o json"*) have queues.json ;;
+  *"get nodepools.kai.resources -o json"*) cat "$dir/krm.json" ;;
+  *"get nodes -o json"*) have nodes.json ;;
+  *"get namespaces -o json"*) need namespaces.json namespaces ;;
+  *"get krmconfigs.kai.resources -o json"*) need krmconfig.json krmconfigs ;;
+  *"apply --dry-run=server"*)
+    # Demo / offline: accept any planned YAML without a real API server.
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        -f|-) break ;;
+      esac
+      shift
+    done
+    echo "configured (server dry run)"
+    exit 0
+    ;;
+  *) echo "fake kubectl: unexpected arguments: $*" >&2; exit 1 ;;
+esac

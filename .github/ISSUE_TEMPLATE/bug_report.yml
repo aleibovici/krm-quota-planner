@@ -1,0 +1,48 @@
+name: Bug report
+description: Something the planner does wrong, or a check it gets wrong
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not paste real tenancy files, kubeconfigs, or anything that names your organization or cluster. A cut-down example with made-up names is enough, and `npm run demo` is a good place to reproduce.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: Error text, a screenshot, or the wrong number and where it showed.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The smallest set of steps, ideally on the bundled demo.
+      placeholder: |
+        1. npm run demo
+        2. Raise the guarantee of ... to ...
+        3. ...
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Planning from
+      options:
+        - Git repository
+        - Live cluster
+        - Bundled demo
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Commit of this project, Node.js, browser, and KRM if a cluster is involved.
+      placeholder: "main @ abc1234, Node 22, Chrome 141, KRM v0.18.2"

@@ -1,0 +1,16 @@
+{
+  "items": [
+    {
+      "spec": {
+        "projectController": {
+          "features": {
+            "createNamespaces": false
+          }
+        },
+        "global": {
+          "namespaceProjectLabelKey": "kai/project"
+        }
+      }
+    }
+  ]
+}

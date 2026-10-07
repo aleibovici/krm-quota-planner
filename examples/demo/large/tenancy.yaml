@@ -1,0 +1,1265 @@
+# Demo tenancy — 160 GPUs on 20 nodes (offline fixture).
+# Regenerate: npm run demo:generate
+---
+apiVersion: kai.resources/v1alpha1
+kind: NodePool
+metadata:
+  name: h100-80gb
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  labelKey: example.com/gpu-class
+  labelValue: h100
+  schedulingShardConfig:
+    placementStrategy:
+      gpu: binpack
+      cpu: spread
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: NodePool
+metadata:
+  name: a100-80gb
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  labelKey: example.com/gpu-class
+  labelValue: a100
+  schedulingShardConfig:
+    placementStrategy:
+      gpu: binpack
+      cpu: spread
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-h100-80gb-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-h100-80gb-1-gpu
+      nodepool: h100-80gb
+      resources:
+        gpu:    {deserved: 24,  limit: 96,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-1-gpu-a100
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 4,  limit: 16,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-h100-80gb-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-h100-80gb-2-gpu
+      nodepool: h100-80gb
+      resources:
+        gpu:    {deserved: 24,  limit: 96,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-2-gpu-a100
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 4,  limit: 16,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-h100-80gb-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-h100-80gb-3-gpu
+      nodepool: h100-80gb
+      resources:
+        gpu:    {deserved: 24,  limit: 96,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-h100-80gb-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-h100-80gb-4-gpu
+      nodepool: h100-80gb
+      resources:
+        gpu:    {deserved: 24,  limit: 96,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-a100-80gb-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-a100-80gb-1-gpu
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 14,  limit: 64,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-a100-80gb-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-a100-80gb-2-gpu
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 14,  limit: 64,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-a100-80gb-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-a100-80gb-3-gpu
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 14,  limit: 64,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Department
+metadata:
+  name: team-a100-80gb-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  queues:
+    - name: team-a100-80gb-4-gpu
+      nodepool: a100-80gb
+      resources:
+        gpu:    {deserved: 14,  limit: 64,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-1
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-1-q
+      nodepool: h100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-1-proj-1-q-a100
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 2,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-2
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-2-q
+      nodepool: h100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-1-proj-2-q-a100
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 2,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-3
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-3-q
+      nodepool: h100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-4
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-4-q
+      nodepool: h100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-5
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-5-q
+      nodepool: h100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-1-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-1-proj-6
+  parent: team-h100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-1-proj-6-q
+      nodepool: h100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-1
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-1-q
+      nodepool: h100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-2-proj-1-q-a100
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 2,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-2
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-2-q
+      nodepool: h100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+    - name: team-h100-80gb-2-proj-2-q-a100
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 2,  limit: 4,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-3
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-3-q
+      nodepool: h100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-4
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-4-q
+      nodepool: h100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-5
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-5-q
+      nodepool: h100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-2-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-2-proj-6
+  parent: team-h100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-2-proj-6-q
+      nodepool: h100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-1
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-1-q
+      nodepool: h100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-2
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-2-q
+      nodepool: h100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-3
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-3-q
+      nodepool: h100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-4
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-4-q
+      nodepool: h100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-5
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-5-q
+      nodepool: h100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-3-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-3-proj-6
+  parent: team-h100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-3-proj-6-q
+      nodepool: h100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-1
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-1-q
+      nodepool: h100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-2
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-2-q
+      nodepool: h100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-3
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-3-q
+      nodepool: h100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-4
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-4-q
+      nodepool: h100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-5
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-5-q
+      nodepool: h100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-h100-80gb-4-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-h100-80gb-4-proj-6
+  parent: team-h100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [h100-80gb]
+  queues:
+    - name: team-h100-80gb-4-proj-6-q
+      nodepool: h100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 4,  limit: 10,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-1
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-1-q
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-2
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-2-q
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-3
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-3-q
+      nodepool: a100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-4
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-4-q
+      nodepool: a100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-5
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-5-q
+      nodepool: a100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-1-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-1-proj-6
+  parent: team-a100-80gb-1
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-1-proj-6-q
+      nodepool: a100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-1
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-1-q
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-2
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-2-q
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-3
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-3-q
+      nodepool: a100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-4
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-4-q
+      nodepool: a100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-5
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-5-q
+      nodepool: a100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-2-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-2-proj-6
+  parent: team-a100-80gb-2
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-2-proj-6-q
+      nodepool: a100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-1
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-1-q
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-2
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-2-q
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-3
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-3-q
+      nodepool: a100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-4
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-4-q
+      nodepool: a100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-5
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-5-q
+      nodepool: a100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-3-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-3-proj-6
+  parent: team-a100-80gb-3
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-3-proj-6-q
+      nodepool: a100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-1
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-1
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-1-q
+      nodepool: a100-80gb
+      priority: 100
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-2
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-2
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-2-q
+      nodepool: a100-80gb
+      priority: 95
+      resources:
+        gpu:    {deserved: 3,  limit: 6,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-3
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-3
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-3-q
+      nodepool: a100-80gb
+      priority: 90
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-4
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-4
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-4-q
+      nodepool: a100-80gb
+      priority: 85
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-5
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-5
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-5-q
+      nodepool: a100-80gb
+      priority: 80
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
+
+---
+apiVersion: kai.resources/v1alpha1
+kind: Project
+metadata:
+  name: team-a100-80gb-4-proj-6
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-wave: "3"
+spec:
+  namespace: team-a100-80gb-4-proj-6
+  parent: team-a100-80gb-4
+  enforceKaiScheduler: false
+  defaultNodePools: [a100-80gb]
+  queues:
+    - name: team-a100-80gb-4-proj-6-q
+      nodepool: a100-80gb
+      priority: 75
+      resources:
+        gpu:    {deserved: 2,  limit: 5,  overQuotaWeight: 1}
+        cpu:    {deserved: -1, limit: -1, overQuotaWeight: 1}
+        memory: {deserved: -1, limit: -1, overQuotaWeight: 1}
