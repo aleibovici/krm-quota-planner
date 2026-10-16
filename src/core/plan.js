@@ -28,12 +28,13 @@ const show = (n) => (n === null ? '?' : formatNumber(n));
  *   nodes?: import('./pools.js').Node[],        the cluster's nodes, to size a pool that does not exist yet
  *   namespaces?: Record<string, Record<string, string>>|null,   name -> labels, when the cluster's namespaces were listed
  *   krm?: { createNamespaces: boolean|null, namespaceLabelKey: string }|null,
+ *   sharing?: { gpuSharingMode: string|null }|null,   how KAI shares cards, when its Config was read
  *   notes?: import('./validate.js').Finding[], findings the source has about itself
  *   base?: { ref: string, sha: string, kind?: 'cluster'|'git' },
  *   today?: string                             YYYY-MM-DD, for the branch name
  * }} input
  */
-export function buildPlan({ config, files, edits = [], additions = [], mirrors = {}, capacity, live, nodes, namespaces, krm, notes = [], base, today = '' }) {
+export function buildPlan({ config, files, edits = [], additions = [], mirrors = {}, capacity, live, nodes, namespaces, krm, sharing, notes = [], base, today = '' }) {
   const tenancyPath = config.tenancy;
   const before = files[tenancyPath];
   if (before === undefined) throw new Error(`${tenancyPath} not found at ${base?.ref ?? 'the base ref'}`);
@@ -61,7 +62,7 @@ export function buildPlan({ config, files, edits = [], additions = [], mirrors =
   /** @type {import('./validate.js').Finding[]} */
   const findings = edited.errors.map((message) => ({ level: 'error', code: 'edit', message }));
   findings.push(...staged.added.filter((a) => a.error).map((a) => ({ level: 'error', code: 'addition', addition: a.index, message: `${a.label} — ${a.error}` })));
-  findings.push(...notes, ...validate(plannedModel, { capacity, live }));
+  findings.push(...notes, ...validate(plannedModel, { capacity, live, sharing }));
   findings.push(...additionNotes(added, plannedModel, { nodes, namespaces, krm, expectations: config.expectations?.file ? { file: config.expectations.file, source: files[config.expectations.file] } : null }));
 
   // What the objects say versus what the scheduler is running. From git: Argo

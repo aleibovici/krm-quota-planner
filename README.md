@@ -109,7 +109,7 @@ The cluster is **read-only** here: `get` plus optional `apply --dry-run=server`.
 |---|---|
 | **Cluster base** | `kubectl get` of NodePools, Departments, Projects — only `spec` is kept so usage in status does not churn the base. |
 | **Git base** | `git show <ref>:path` — not the working tree; ref is fetched first unless `--no-fetch`. |
-| **Cluster overlay** | Pool capacity and per-queue usage when kubectl can reach the cluster. |
+| **Cluster overlay** | Pool capacity and per-queue usage when kubectl can reach the cluster; KAI's GPU sharing mode (its `Config`) and each node's fraction readiness and MIG labels, when they can be read. |
 | **Cluster output** | `kubectl patch` / `create` commands (test-then-replace, givers before takers). |
 | **Git output** | Local commit on a new branch via git plumbing — your checkout and index stay as they were. |
 
@@ -148,8 +148,10 @@ Errors block **Create local commit** and **Show kubectl commands**; you can stil
 | error | Negative values other than `-1`; unknown node pool or parent department |
 | error | A queue name used by two objects, or two projects on one namespace — KRM accepts both |
 | error | Two queues on one pool in one object, or two pools selecting the same label pair (KRM rejects these too) |
+| error | A guarantee or limit that is a fraction of a card while KAI's GPU sharing is `Disabled` (read from its `Config`) — KRM accepts the number, and nothing could ever claim it |
 | warning | A project queue on a pool where its department has none — KRM accepts it, and the guarantee is part of no department's share |
 | warning | A new pool that no node is labelled for, or whose nodes the `ManagedNodesConfig` whitelist does not cover |
+| warning | A fraction of a card on a pool whose nodes are not marked ready for GPU fractions (`NvFractions` mode), or whose GPUs are MIG-partitioned — the fraction goes unused there |
 | warning | A new project whose namespace does not exist, is not labelled for it, or belongs to another project — KRM accepts the project regardless |
 | warning | A project limit above its department's (the department wins) |
 | warning | In use right now above the planned limit, or non-preemptible use above the planned guarantee — nothing is evicted, so the change does not take effect until those stop |

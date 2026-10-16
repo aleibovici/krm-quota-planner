@@ -274,3 +274,28 @@ test('adding a project, from git: one commit holding the new document', async (t
   assert.equal(git('diff', '--stat', 'main', 'quota/add-lab', '--', config.tenancy).includes('tenancy.yaml'), true);
   assert.equal(git('status', '--porcelain'), '');
 });
+
+test('from a cluster: KAI\'s sharing mode is read, and a fractional guarantee is checked against it', async (t) => {
+  const { app, call } = await onCluster();
+  t.after(() => app.server.close());
+  const half = [{ id: BENCH, value: 0.5 }];
+
+  // No Config object on the cluster: the fraction passes without comment.
+  let plan = (await call('POST', '/api/plan', { edits: half })).body;
+  assert.ok(!plan.findings.some((f) => f.code.startsWith('fraction-')), 'nothing known, nothing said');
+
+  writeFileSync(join(process.env.FAKE_CLUSTER, 'kaiconfig.json'), JSON.stringify({ items: [{ metadata: { name: 'kai-config' }, spec: { global: { gpuSharingMode: 'Disabled' } } }] }));
+  assert.equal((await call('POST', '/api/reload')).status, 200);
+  plan = (await call('POST', '/api/plan', { edits: half })).body;
+  const found = plan.findings.find((f) => f.code === 'fraction-disabled');
+  assert.ok(found, 'with sharing Disabled the half card is an error');
+  assert.equal(found.level, 'error');
+  assert.equal(found.queue, 'benchmark-rtx');
+  assert.equal(plan.canCommit, false);
+
+  // The deprecated boolean on an older install is read as the two modes it meant.
+  writeFileSync(join(process.env.FAKE_CLUSTER, 'kaiconfig.json'), JSON.stringify({ items: [{ metadata: { name: 'kai-config' }, spec: { global: { gpuSharing: true } } }] }));
+  await call('POST', '/api/reload');
+  plan = (await call('POST', '/api/plan', { edits: half })).body;
+  assert.ok(!plan.findings.some((f) => f.code.startsWith('fraction-')), 'sharing on: a half card is fine');
+});
