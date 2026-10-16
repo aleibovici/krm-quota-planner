@@ -8,7 +8,7 @@
 
 import { parseTenancy, applyTenancyEdits, formatNumber, UNLIMITED, queuesOf } from './tenancy.js';
 import { validate } from './validate.js';
-import { patchExpectationsForModels, inspectMirror, applyMirror } from './coupled.js';
+import { patchExpectationsForModels, inspectMirror, applyMirror, discoverQuotaManifests, liveQuotaMirrors } from './coupled.js';
 import { unifiedDiff } from './diff.js';
 import { applyAdditions, additionNotes } from './additions.js';
 import { poolOf, capacityOfPool } from './pools.js';
@@ -29,12 +29,13 @@ const show = (n) => (n === null ? '?' : formatNumber(n));
  *   namespaces?: Record<string, Record<string, string>>|null,   name -> labels, when the cluster's namespaces were listed
  *   krm?: { createNamespaces: boolean|null, namespaceLabelKey: string }|null,
  *   sharing?: { gpuSharingMode: string|null }|null,   how KAI shares cards, when its Config was read
+ *   quotas?: Record<string, { name: string, key: string, value: number, raw: string }[]>|null,   the cluster's ResourceQuotas that count cards, by namespace
  *   notes?: import('./validate.js').Finding[], findings the source has about itself
  *   base?: { ref: string, sha: string, kind?: 'cluster'|'git' },
  *   today?: string                             YYYY-MM-DD, for the branch name
  * }} input
  */
-export function buildPlan({ config, files, edits = [], additions = [], mirrors = {}, capacity, live, nodes, namespaces, krm, sharing, notes = [], base, today = '' }) {
+export function buildPlan({ config, files, edits = [], additions = [], mirrors = {}, capacity, live, nodes, namespaces, krm, sharing, quotas, notes = [], base, today = '' }) {
   const tenancyPath = config.tenancy;
   const before = files[tenancyPath];
   if (before === undefined) throw new Error(`${tenancyPath} not found at ${base?.ref ?? 'the base ref'}`);
@@ -108,7 +109,13 @@ export function buildPlan({ config, files, edits = [], additions = [], mirrors =
   }
 
   // --- ResourceQuota mirrors (suggested, optional) ----------------------------
-  const mirrorResults = (config.resourceQuotaMirrors ?? []).map((cfg) => {
+  // The profile's list, plus every ResourceQuota manifest the source loaded
+  // for a project's namespace. A project's queue added on another pool makes
+  // its namespace ceiling the sum, so the base model's projects are what the
+  // manifests are matched by, and the planned one is what they are measured against.
+  const listed = config.resourceQuotaMirrors ?? [];
+  const mirrorConfigs = [...listed, ...discoverQuotaManifests(files, plannedModel, listed)];
+  const mirrorResults = mirrorConfigs.map((cfg) => {
     const source = files[cfg.file];
     const now = inspectMirror(cfg, source, plannedModel);
     const was = inspectMirror(cfg, source, baseModel);
@@ -120,6 +127,19 @@ export function buildPlan({ config, files, edits = [], additions = [], mirrors =
     const { start, end, ...rest } = now;
     return { ...rest, included, differedBefore: was.status === 'differs' };
   });
+  // From a cluster the quotas are objects, not files: shown with the mirrors,
+  // and applied as one more kubectl patch when included.
+  const liveQuotas = liveQuotaMirrors(quotas, baseModel, plannedModel, mirrors);
+  mirrorResults.push(...liveQuotas);
+  // A quota this plan leaves below the project's ceiling is a warning when the
+  // plan opened the gap, and a note when the gap was already there: a quota
+  // kept deliberately low is somebody's choice, and only ticking it changes it.
+  for (const m of liveQuotas.filter((x) => x.status === 'differs' && !x.included && x.suggested > x.current)) {
+    const gap = `ResourceQuota ${m.name} caps ${m.key} at ${m.current}, but ${m.note.replace(/; the quota says \d+$/, '')} — Kubernetes refuses the next whole-card pod before KAI sees it`;
+    findings.push(m.differedBefore
+      ? { level: 'info', code: 'namespace-quota-low', message: `namespace ${m.namespace}: ${gap}. It was like this before this plan, so it is left alone unless you tick it under "Files that move with it"` }
+      : { level: 'warning', code: 'namespace-quota', message: `namespace ${m.namespace}: ${gap}. Tick it under "Files that move with it" to raise it with this change` });
+  }
 
   const changed = outputs.filter((o) => o.before !== o.after);
 
@@ -153,6 +173,7 @@ export function buildPlan({ config, files, edits = [], additions = [], mirrors =
     findings,
     expectations,
     mirrors: mirrorResults,
+    quotaPatches: liveQuotas.filter((m) => m.included).map(({ namespace, name, key, raw, suggested }) => ({ namespace, name, key, from: raw, to: String(suggested) })),
     reminders: empty ? [] : config.reminders ?? [],
     files: changed.map(({ path, role, after }) => ({ path, role, content: after })),
     diff: changed.map((o) => unifiedDiff(o.path, o.before, o.after)).join(''),
@@ -224,7 +245,7 @@ function commitMessage(config, baseModel, plannedModel, changes, added, expectat
   const body = ['GPU numbers are deserved/limit in cards; -1 = unlimited.', '', ...parts.map((p) => `- ${p}`)];
   const coupled = [];
   if (expectations.changes.length) coupled.push(`${expectations.file}: ${[...new Set(expectations.changes.map((c) => c.variable))].join(', ')} updated to match`);
-  for (const m of mirrors.filter((m) => m.included)) coupled.push(`${m.file}: ${m.object} ${m.key} ${m.current} → ${m.suggested} (mirrors ${m.queue})`);
+  for (const m of mirrors.filter((m) => m.included)) coupled.push(`${m.file}: ${m.object} ${m.key} ${m.current} → ${m.suggested} (mirrors ${m.queue ?? `project ${m.project}`})`);
   if (coupled.length) body.push('', ...coupled.map((c) => `- ${c}`));
   if (base?.sha) body.push('', `Planned with krm-quota-planner against ${base.ref} (${base.sha.slice(0, 7)}).`);
   return `${subject}\n\n${body.join('\n')}\n`;

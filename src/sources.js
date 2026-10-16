@@ -12,7 +12,7 @@
 
 import { createHash } from 'node:crypto';
 import { renderTenancy, patchCommands } from './core/krm.js';
-import { repoRoot, fetchRef, describeRef, showFile, createCommit } from './git.js';
+import { repoRoot, fetchRef, describeRef, showFile, createCommit, grepFiles } from './git.js';
 import { currentContext, readKrmObjects } from './cluster.js';
 
 /** The name the objects read from a cluster go by in the plan and the diff. */
@@ -38,7 +38,11 @@ export async function gitSource({ repo: path, ref, fetch, config }) {
     async load() {
       const fetched = fetch ? await fetchRef(repo, ref) : { ok: false, skipped: true, error: 'fetch disabled (--no-fetch)' };
       const base = await head();
-      const paths = [config.tenancy, config.expectations?.file, ...(config.resourceQuotaMirrors ?? []).map((m) => m.file)].filter(Boolean);
+      // Every ResourceQuota manifest at the ref is loaded too: the plan picks
+      // out those in a project's namespace, so a namespace quota the profile
+      // does not list still moves with the queue it bounds.
+      const quotaFiles = await grepFiles(repo, base.sha, 'kind: ResourceQuota', ['*.yaml', '*.yml']);
+      const paths = [...new Set([config.tenancy, config.expectations?.file, ...(config.resourceQuotaMirrors ?? []).map((m) => m.file), ...quotaFiles].filter(Boolean))];
       const files = Object.fromEntries(await Promise.all(paths.map(async (p) => [p, await showFile(repo, base.sha, p)])));
       return { base, files, notes: [], fetched };
     },
@@ -96,7 +100,7 @@ export async function clusterSource({ context, kubeconfig }) {
     },
     moved: () => `the KRM objects on ${target.context} changed since this page loaded — press Reload (your edits are kept) and check the plan against them`,
     describe: (loaded) => ({ kind: 'cluster', ...loaded.base, context: target.context, tenancy: CLUSTER_FILE, displayName: undefined }),
-    commands: (loaded, plan) => patchCommands(loaded.objects, plan.changes, target, plan.additions),
+    commands: (loaded, plan) => patchCommands(loaded.objects, plan.changes, target, plan.additions, plan.quotaPatches),
   };
 }
 

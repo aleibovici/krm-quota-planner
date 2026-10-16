@@ -43,6 +43,17 @@ export async function describeRef(repo, ref) {
   return { ref, sha, date, subject };
 }
 
+/**
+ * Paths at a commit whose text contains `needle`, among files matching the
+ * patterns. Nothing found is an empty list, not an error.
+ * @returns {Promise<string[]>}
+ */
+export async function grepFiles(repo, sha, needle, patterns) {
+  const r = await exec('git', ['-C', repo, 'grep', '-l', '-F', '-e', needle, sha, '--', ...patterns]);
+  if (r.code !== 0) return [];
+  return r.stdout.split('\n').filter(Boolean).map((line) => line.slice(line.indexOf(':') + 1));
+}
+
 /** @returns {Promise<string|undefined>} undefined when the path does not exist at that commit */
 export async function showFile(repo, sha, path) {
   const r = await exec('git', ['-C', repo, 'show', `${sha}:${path}`]);

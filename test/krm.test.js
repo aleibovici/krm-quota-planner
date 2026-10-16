@@ -102,3 +102,15 @@ test('patch commands: one per object, every replace guarded, givers before taker
   assert.deepEqual(who(patchCommands(objects, [{ id: PLATFORM, from: 4, to: 2 }, { id: CODER, from: 3, to: 2 }, { id: BENCH, from: 1, to: 0 }])), ['workspace', 'benchmark', 'platform']);
   assert.throws(() => patchCommands(objects, [{ id: 'Project/gone/gone-rtx/gpu/deserved', from: 1, to: 2 }]), /not among the objects read/);
 });
+
+test('a namespace quota is patched with the KRM objects: a raise first, a cut last', () => {
+  const objects = JSON.parse(readFileSync(new URL('./fixtures/live-krm.json', import.meta.url), 'utf8')).items;
+  const change = { id: 'Project/workspace/workspace-rtx/gpu/limit', from: 3, to: 5 };
+  const up = patchCommands(objects, [change], { context: 'ctx' }, [], [{ namespace: 'workspace', name: 'workspace', key: 'requests.nvidia.com/gpu', from: '3', to: '5' }]);
+  assert.equal(up.length, 2);
+  assert.equal(up[0], `kubectl --context ctx -n workspace patch resourcequota workspace --type=json -p '[{"op":"test","path":"/spec/hard/requests.nvidia.com~1gpu","value":"3"},{"op":"replace","path":"/spec/hard/requests.nvidia.com~1gpu","value":"5"}]'`);
+  assert.match(up[1], /patch projects\.kai\.resources workspace/);
+  const down = patchCommands(objects, [{ ...change, to: 2 }], { context: 'ctx' }, [], [{ namespace: 'workspace', name: 'workspace', key: 'requests.nvidia.com/gpu', from: '3', to: '2' }]);
+  assert.match(down[0], /patch projects\.kai\.resources/);
+  assert.match(down[1], /patch resourcequota workspace/);
+});

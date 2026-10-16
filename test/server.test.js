@@ -299,3 +299,44 @@ test('from a cluster: KAI\'s sharing mode is read, and a fractional guarantee is
   plan = (await call('POST', '/api/plan', { edits: half })).body;
   assert.ok(!plan.findings.some((f) => f.code.startsWith('fraction-')), 'sharing on: a half card is fine');
 });
+
+test('from a cluster: a namespace ResourceQuota moves with the project, and is patched in the commands', async (t) => {
+  const { app, call } = await onCluster();
+  t.after(() => app.server.close());
+  writeFileSync(join(process.env.FAKE_CLUSTER, 'resourcequotas.json'), JSON.stringify({ items: [
+    { metadata: { name: 'workspace', namespace: 'workspace' }, spec: { hard: { 'requests.nvidia.com/gpu': '3', pods: '40' } } },
+    { metadata: { name: 'cpu-only', namespace: 'benchmark' }, spec: { hard: { pods: '10' } } },
+  ] }));
+  await call('POST', '/api/reload');
+
+  const edits = [{ id: 'Project/workspace/workspace-rtx/gpu/limit', value: 4 }];
+  const plan = (await call('POST', '/api/plan', { edits })).body;
+  const ws = plan.mirrors.find((m) => m.file === 'workspace/workspace');
+  assert.deepEqual([ws.status, ws.current, ws.suggested, ws.included], ['differs', 3, 4, true]);
+  assert.equal(plan.mirrors.length, 1, 'a quota that counts no cards is not shown');
+
+  const made = await call('POST', '/api/apply', { edits });
+  assert.equal(made.status, 200);
+  assert.match(made.body.commands[0], /^kubectl --context fake-cluster -n workspace patch resourcequota workspace --type=json -p '\[\{"op":"test","path":"\/spec\/hard\/requests\.nvidia\.com~1gpu","value":"3"\},\{"op":"replace",[^\]]*"value":"4"\}\]'$/);
+  assert.match(made.body.commands[1], /patch projects\.kai\.resources workspace/);
+
+  // Unticked: a warning on the plan, and no quota command.
+  const left = await call('POST', '/api/apply', { edits, mirrors: { 'workspace/workspace': false } });
+  assert.equal(left.body.commands.length, 1);
+  const warned = (await call('POST', '/api/plan', { edits, mirrors: { 'workspace/workspace': false } })).body;
+  assert.ok(warned.findings.some((f) => f.code === 'namespace-quota' && f.level === 'warning'));
+});
+
+test('from git: a ResourceQuota manifest the profile does not list is found at the ref', async (t) => {
+  const { app, call, put, git } = await scratch();
+  t.after(() => app.server.close());
+  put('services/probe/manifests/quota.yaml', 'apiVersion: v1\nkind: ResourceQuota\nmetadata:\n  name: probe\n  namespace: kai-verify\nspec:\n  hard:\n    requests.nvidia.com/gpu: "1"\n');
+  git('add', '-A');
+  git('commit', '-q', '-m', 'probe quota');
+  await call('POST', '/api/reload');
+
+  const plan = (await call('POST', '/api/plan', { edits: [{ id: 'Project/kai-verify/kai-verify-rtx/gpu/limit', value: 2 }] })).body;
+  const probe = plan.mirrors.find((m) => m.file === 'services/probe/manifests/quota.yaml');
+  assert.deepEqual([probe.project, probe.status, probe.current, probe.suggested, probe.included], ['kai-verify', 'differs', 1, 2, true]);
+  assert.ok(plan.files.some((f) => f.path === 'services/probe/manifests/quota.yaml' && f.content.includes('"2"')));
+});

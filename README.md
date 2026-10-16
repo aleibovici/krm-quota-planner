@@ -109,8 +109,8 @@ The cluster is **read-only** here: `get` plus optional `apply --dry-run=server`.
 |---|---|
 | **Cluster base** | `kubectl get` of NodePools, Departments, Projects — only `spec` is kept so usage in status does not churn the base. |
 | **Git base** | `git show <ref>:path` — not the working tree; ref is fetched first unless `--no-fetch`. |
-| **Cluster overlay** | Pool capacity and per-queue usage when kubectl can reach the cluster; KAI's GPU sharing mode (its `Config`) and each node's fraction readiness and MIG labels, when they can be read. |
-| **Cluster output** | `kubectl patch` / `create` commands (test-then-replace, givers before takers). |
+| **Cluster overlay** | Pool capacity and per-queue usage when kubectl can reach the cluster; KAI's GPU sharing mode (its `Config`), each node's fraction readiness and MIG labels, and the ResourceQuotas in every project's namespace, when they can be read. |
+| **Cluster output** | `kubectl patch` / `create` commands (test-then-replace, givers before takers), plus a `patch resourcequota` for each namespace quota included with the plan. |
 | **Git output** | Local commit on a new branch via git plumbing — your checkout and index stay as they were. |
 
 ## Adding objects
@@ -152,6 +152,7 @@ Errors block **Create local commit** and **Show kubectl commands**; you can stil
 | warning | A project queue on a pool where its department has none — KRM accepts it, and the guarantee is part of no department's share |
 | warning | A new pool that no node is labelled for, or whose nodes the `ManagedNodesConfig` whitelist does not cover |
 | warning | A fraction of a card on a pool whose nodes are not marked ready for GPU fractions (`NvFractions` mode), or whose GPUs are MIG-partitioned — the fraction goes unused there |
+| warning | From a cluster: a namespace ResourceQuota that this plan leaves capping whole cards below what the project's queues now allow — Kubernetes refuses the next whole-card pod before KAI sees it (tick it to raise it with the change). A gap that was already there is a note |
 | warning | A new project whose namespace does not exist, is not labelled for it, or belongs to another project — KRM accepts the project regardless |
 | warning | A project limit above its department's (the department wins) |
 | warning | In use right now above the planned limit, or non-preemptible use above the planned guarantee — nothing is evicted, so the change does not take effect until those stop |
@@ -167,7 +168,7 @@ Errors block **Create local commit** and **Show kubectl commands**; you can stil
 Queues are often duplicated in shell vars or namespace ResourceQuotas. A `--config` profile can name:
 
 - **`expectations`** — variables a verify script compares to live queues (rewritten automatically)
-- **`resourceQuotaMirrors`** — ResourceQuotas mirroring a queue’s limit in whole cards (optional tick box in the UI)
+- **`resourceQuotaMirrors`** — ResourceQuotas mirroring a queue’s limit in whole cards (optional tick box in the UI). Not required: every ResourceQuota manifest at the ref whose namespace belongs to a project is found on its own and follows that project. A project with queues on several pools gets the sum of their whole-card limits, since one namespace quota bounds all of them.
 - **`reminders`** — paths to update manually (changelog, runbooks) listed in the plan message
 
 See [`examples/gitops.json`](examples/gitops.json).

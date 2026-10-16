@@ -9,6 +9,7 @@
 import { exec, run } from './exec.js';
 import { parseQuantity } from './core/quantity.js';
 import { poolOf, capacityOfPool } from './core/pools.js';
+import { GPU_QUOTA_KEYS } from './core/coupled.js';
 
 const GPU = 'nvidia.com/gpu';
 // Set on a GPU node by KAI's gpu-sharing operator, in NvFractions mode only: until it is True no fraction is placed there.
@@ -68,11 +69,12 @@ export async function readKrmObjects(target = {}) {
  *   nodes: import('./core/pools.js').Node[],
  *   namespaces: Record<string, Record<string, string>>|null,   name -> labels; null when they could not be listed
  *   krm: { createNamespaces: boolean|null, namespaceLabelKey: string }|null,   what KRM does about a project's namespace; null when its config could not be read
- *   kai: { gpuSharingMode: string|null }|null   how KAI shares cards (Disabled, NonMemoryEnforced, HamiCore, NvFractions); null when its Config could not be read
+ *   kai: { gpuSharingMode: string|null }|null,   how KAI shares cards (Disabled, NonMemoryEnforced, HamiCore, NvFractions); null when its Config could not be read
+ *   quotas: Record<string, { name: string, key: string, value: number, raw: string }[]>|null   namespace -> its ResourceQuotas that count whole cards; null when they could not be listed
  * }>}
  */
 export async function readLive(target = {}) {
-  const result = { ok: false, context: target.context ?? '', readAt: new Date().toISOString(), queues: {}, pools: {}, nodes: [], namespaces: null, krm: null, kai: null };
+  const result = { ok: false, context: target.context ?? '', readAt: new Date().toISOString(), queues: {}, pools: {}, nodes: [], namespaces: null, krm: null, kai: null, quotas: null };
   try {
     if (!target.context) result.context = await currentContext(target);
     const [queues, pools, nodes] = await Promise.all([
@@ -102,10 +104,11 @@ export async function readLive(target = {}) {
 
     // Only needed to say whether a new project's namespace is ready for it;
     // either may be off limits to someone who can still plan quotas.
-    const [namespaces, config, kaiConfig] = await Promise.all([
+    const [namespaces, config, kaiConfig, quotas] = await Promise.all([
       kubectl(['get', 'namespaces', '-o', 'json'], target).then(JSON.parse, () => null),
       kubectl(['get', 'krmconfigs.kai.resources', '-o', 'json'], target).then(JSON.parse, () => null),
       kubectl(['get', 'configs.kai.scheduler', '-o', 'json'], target).then(JSON.parse, () => null),
+      kubectl(['get', 'resourcequotas', '-A', '-o', 'json'], target).then(JSON.parse, () => null),
     ]);
     if (namespaces) result.namespaces = Object.fromEntries((namespaces.items ?? []).map((n) => [n.metadata.name, n.metadata.labels ?? {}]));
     const spec = config?.items?.[0]?.spec;
@@ -115,6 +118,7 @@ export async function readLive(target = {}) {
     }
     const kai = kaiConfig?.items?.[0]?.spec;
     if (kai) result.kai = { gpuSharingMode: sharingMode(kai) };
+    if (quotas) result.quotas = gpuQuotas(quotas.items ?? []);
   } catch (err) {
     result.error = err.message;
   }
@@ -159,6 +163,25 @@ function sharingMode(spec) {
   if (typeof mode === 'string' && mode) return mode;
   const legacy = spec.global?.gpuSharing ?? spec.admission?.gpuSharing;
   return typeof legacy === 'boolean' ? (legacy ? 'NonMemoryEnforced' : 'Disabled') : null;
+}
+
+/**
+ * The ResourceQuotas that bound whole cards, by namespace. A quota is kept
+ * once, under the most specific key it states; the raw value is kept for the
+ * patch that tests it before replacing it.
+ */
+export function gpuQuotas(items) {
+  const out = {};
+  for (const q of items) {
+    const hard = q.spec?.hard ?? {};
+    const key = GPU_QUOTA_KEYS.find((k) => hard[k] !== undefined);
+    if (!key) continue;
+    const value = parseQuantity(hard[key]);
+    if (!Number.isFinite(value)) continue;
+    const ns = q.metadata?.namespace ?? '';
+    (out[ns] ??= []).push({ name: q.metadata?.name ?? '?', key, value, raw: String(hard[key]) });
+  }
+  return out;
 }
 
 /** @returns {import('./core/pools.js').Node} */

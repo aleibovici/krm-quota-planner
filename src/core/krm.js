@@ -71,9 +71,10 @@ function managedBy(metadata) {
  * @param {{ id: string, from: number|null, to: number }[]} changes
  * @param {{ context?: string, kubeconfig?: string }} [target]
  * @param {import('./additions.js').Added[]} [additions]
+ * @param {{ namespace: string, name: string, key: string, from: string, to: string }[]} [quotaPatches] namespace ResourceQuotas raised or lowered with the plan
  * @returns {string[]}
  */
-export function patchCommands(objects, changes, { context, kubeconfig } = {}, additions = []) {
+export function patchCommands(objects, changes, { context, kubeconfig } = {}, additions = [], quotaPatches = []) {
   /** @type {Map<string, { kind: string, name: string, guarded: Set<number>, gained: number, grows?: boolean, manifest?: string, ops: any[] }>} */
   const perObject = new Map();
   const added = additions.filter((a) => !a.error);
@@ -117,10 +118,21 @@ export function patchCommands(objects, changes, { context, kubeconfig } = {}, ad
   }
 
   const kubectl = ['kubectl', ...(kubeconfig ? ['--kubeconfig', kubeconfig] : []), ...(context ? ['--context', context] : [])];
-  return [...perObject.values()].sort((a, b) => turn(a) - turn(b)).map(({ kind, name, ops, manifest }) => (manifest
+  const krm = [...perObject.values()].sort((a, b) => turn(a) - turn(b)).map(({ kind, name, ops, manifest }) => (manifest
     ? `${[...kubectl, 'create', '-f', '-'].map(shellWord).join(' ')} <<'EOF'\n${manifest}EOF`
     : [...kubectl, 'patch', PLURAL[kind], name, '--type=json', '-p', JSON.stringify(ops)].map(shellWord).join(' ')));
+  // A namespace quota is Kubernetes' own ceiling, checked at pod creation. A
+  // raise goes first so nothing a bigger queue admits is refused meanwhile; a
+  // cut goes last, once the queues no longer promise what it takes away.
+  const quota = (q) => [...kubectl, '-n', q.namespace, 'patch', 'resourcequota', q.name, '--type=json', '-p',
+    JSON.stringify([{ op: 'test', path: `/spec/hard/${pointer(q.key)}`, value: q.from }, { op: 'replace', path: `/spec/hard/${pointer(q.key)}`, value: q.to }])].map(shellWord).join(' ');
+  const raised = quotaPatches.filter((q) => Number(q.to) > Number(q.from));
+  const lowered = quotaPatches.filter((q) => !(Number(q.to) > Number(q.from)));
+  return [...raised.map(quota), ...krm, ...lowered.map(quota)];
 }
+
+/** A map key as a JSON Pointer segment: `/` and `~` escaped. */
+const pointer = (key) => key.replaceAll('~', '~0').replaceAll('/', '~1');
 
 /**
  * Which refusals in a dry-run's output are only there because the dry-run
