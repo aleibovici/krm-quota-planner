@@ -125,6 +125,8 @@ export function initActions() {
       const about = (command) => {
         const patch = / patch (\w+?)s\.kai\.resources (\S+)/.exec(command);
         if (patch) return `Change ${patch[1]} ${patch[2]}`;
+        const quota = / -n (\S+) patch resourcequota (\S+)/.exec(command);
+        if (quota) return `Change the ResourceQuota ${quota[2]} in namespace ${quota[1]}`;
         const kind = /^kind: (\w+)$/m.exec(command)?.[1] ?? 'object';
         return `Create ${kind === 'NodePool' ? 'node pool' : kind.toLowerCase()} ${/^  name: (\S+)$/m.exec(command)?.[1] ?? ''}`;
       };

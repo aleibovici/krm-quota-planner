@@ -7,7 +7,7 @@ import { dirname, join } from 'node:path';
 import { buildPlan } from '../src/core/plan.js';
 import { parseTenancy, applyTenancyEdits, fieldId } from '../src/core/tenancy.js';
 import { validate } from '../src/core/validate.js';
-import { patchExpectations, inspectMirror } from '../src/core/coupled.js';
+import { patchExpectations, inspectMirror, namespaceCeiling, discoverQuotaManifests, liveQuotaMirrors } from '../src/core/coupled.js';
 import { unifiedDiff } from '../src/core/diff.js';
 import { parseQuantity } from '../src/core/quantity.js';
 
@@ -235,4 +235,88 @@ test('comments that explain a changed number are pointed at, not rewritten', () 
   assert.match(notes[0], /tenancy\.yaml: the comment at lines \d+–\d+, \d+–\d+ explains/);
   // and the comment text itself is untouched
   assert.ok(p.files[0].content.includes('# 3 of the 4 cards (was 4/4)'));
+});
+
+// --- a namespace quota follows the whole project, across its pools ------------
+const verifyQuota = (n) => `apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: probe
+  namespace: kai-verify
+spec:
+  hard:
+    requests.nvidia.com/gpu: "${n}"
+`;
+// The project put on a second pool: the picture from a real session, one queue
+// of 3 on one pool and a new one of 8 on another, and a namespace quota of 3.
+const secondPool = [
+  { kind: 'NodePool', name: 'b200', labelKey: 'example.com/gpu-class', labelValue: 'b200' },
+  { kind: 'Queue', ownerKind: 'Department', owner: 'platform', queue: { name: 'platform-b200', nodepool: 'b200', gpu: { deserved: 8, limit: 8, overQuotaWeight: 1 } } },
+  { kind: 'Queue', ownerKind: 'Project', owner: 'workspace', queue: { name: 'workspace-b200', nodepool: 'b200', gpu: { deserved: 1, limit: 8, overQuotaWeight: 1 } } },
+];
+
+test('namespaceCeiling: the sum of whole-card limits across pools, open when any is unlimited', () => {
+  const model = parseTenancy(files[config.tenancy]);
+  assert.deepEqual(namespaceCeiling(model, 'workspace').cards, 3);
+  assert.equal(namespaceCeiling(model, 'nobody').missing, true);
+  const two = buildPlan({ config, files, capacity, additions: secondPool });
+  assert.deepEqual(codes(two.findings, 'error'), []);
+  const ws = two.mirrors.find((m) => m.file === 'services/coder/manifests/workspace-quota.yaml');
+  // The listed mirror still follows its one queue, as configured.
+  assert.deepEqual([ws.status, ws.current, ws.suggested], ['in-sync', 3, 3]);
+  const open = parseTenancy(applyTenancyEdits(files[config.tenancy], [{ id: gpu('Project', 'workspace', 'workspace-rtx', 'limit'), value: -1 }]).source);
+  assert.equal(namespaceCeiling(open, 'workspace').cards, null);
+});
+
+test('a ResourceQuota manifest in a project namespace is found without being listed, and follows the sum', () => {
+  const withProbe = { ...files, 'services/probe/manifests/quota.yaml': verifyQuota(1), 'services/other/quota.yaml': verifyQuota(1).replace('namespace: kai-verify', 'namespace: elsewhere') };
+  const model = parseTenancy(files[config.tenancy]);
+  assert.deepEqual(discoverQuotaManifests(withProbe, model, config.resourceQuotaMirrors), [{ file: 'services/probe/manifests/quota.yaml', key: 'requests.nvidia.com/gpu', project: 'kai-verify', discovered: true }]);
+
+  const quiet = buildPlan({ config, files: withProbe, capacity });
+  const probe = quiet.mirrors.find((m) => m.project === 'kai-verify');
+  assert.deepEqual([probe.status, probe.current, probe.suggested, probe.included], ['in-sync', 1, 1, false]);
+
+  // kai-verify on a second pool with a limit of 8: the namespace may now hold 9, and the manifest moves with it.
+  const more = buildPlan({ config, files: withProbe, capacity, additions: [secondPool[0], secondPool[1],
+    { kind: 'Queue', ownerKind: 'Project', owner: 'kai-verify', queue: { name: 'kai-verify-b200', nodepool: 'b200', gpu: { deserved: 0, limit: 8, overQuotaWeight: 1 } } }] });
+  const moved = more.mirrors.find((m) => m.project === 'kai-verify');
+  assert.deepEqual([moved.status, moved.current, moved.suggested, moved.included, moved.differedBefore], ['differs', 1, 9, true, false]);
+  assert.match(moved.note, /limits across its pools add up to 9 \(1 on rtx-pro-6000 \+ 8 on b200\)/);
+  const file = more.files.find((f) => f.path === 'services/probe/manifests/quota.yaml');
+  assert.ok(file.content.includes('requests.nvidia.com/gpu: "9"'));
+  assert.match(more.message, /quota\.yaml: ResourceQuota\/probe requests\.nvidia\.com\/gpu 1 → 9 \(mirrors project kai-verify\)/);
+});
+
+test('live ResourceQuotas from a cluster: shown like mirrors, patched when included', () => {
+  const baseModel = parseTenancy(files[config.tenancy]);
+  const quotas = { workspace: [{ name: 'workspace', key: 'requests.nvidia.com/gpu', value: 3, raw: '3' }], nowhere: [{ name: 'x', key: 'nvidia.com/gpu', value: 1, raw: '1' }] };
+  assert.deepEqual(liveQuotaMirrors(null, baseModel, baseModel), []);
+  const same = liveQuotaMirrors(quotas, baseModel, baseModel);
+  assert.deepEqual(same.map((m) => [m.file, m.status, m.included]), [['workspace/workspace', 'in-sync', false]]);
+
+  const p = buildPlan({ config: { tenancy: config.tenancy }, files: { [config.tenancy]: files[config.tenancy] }, capacity, quotas, additions: secondPool, base: { kind: 'cluster', ref: 'ctx', sha: 'abc' } });
+  const ws = p.mirrors.find((m) => m.file === 'workspace/workspace');
+  assert.deepEqual([ws.status, ws.current, ws.suggested, ws.included, ws.namespace], ['differs', 3, 11, true, 'workspace']);
+  assert.deepEqual(p.quotaPatches, [{ namespace: 'workspace', name: 'workspace', key: 'requests.nvidia.com/gpu', from: '3', to: '11' }]);
+  assert.deepEqual(p.files.map((f) => f.role), ['tenancy'], 'a live quota is an object, not a file');
+  assert.ok(!p.findings.some((f) => f.code === 'namespace-quota'), 'included: no warning, it goes with the plan');
+
+  // Unticked, it is a warning that says what the cluster would do.
+  const left = buildPlan({ config: { tenancy: config.tenancy }, files: { [config.tenancy]: files[config.tenancy] }, capacity, quotas, additions: secondPool, mirrors: { 'workspace/workspace': false } });
+  assert.deepEqual(left.quotaPatches, []);
+  const warning = left.findings.find((f) => f.code === 'namespace-quota');
+  assert.equal(warning.level, 'warning');
+  assert.match(warning.message, /ResourceQuota workspace caps requests\.nvidia\.com\/gpu at 3, but project workspace's limits across its pools add up to 11 \(3 on rtx-pro-6000 \+ 8 on b200\)/);
+  assert.equal(left.canCommit, true, 'a low quota never blocks the plan');
+
+  // A gap that was there before the plan is a note, not a warning: the plan did not open it.
+  const old = { 'kai-verify': [{ name: 'kai-verify', key: 'requests.nvidia.com/gpu', value: 0, raw: '0' }] };
+  const untouched = buildPlan({ config: { tenancy: config.tenancy }, files: { [config.tenancy]: files[config.tenancy] }, capacity, quotas: old, edits: [{ id: gpu('Project', 'benchmark', 'benchmark-rtx', 'deserved'), value: 2 }] });
+  const kv = untouched.mirrors.find((m) => m.file === 'kai-verify/kai-verify');
+  assert.deepEqual([kv.status, kv.included, kv.differedBefore], ['differs', false, true]);
+  assert.ok(!untouched.findings.some((f) => f.code === 'namespace-quota'));
+  const note = untouched.findings.find((f) => f.code === 'namespace-quota-low');
+  assert.equal(note.level, 'info');
+  assert.match(note.message, /It was like this before this plan/);
 });

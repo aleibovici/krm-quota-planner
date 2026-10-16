@@ -28,6 +28,7 @@ export function planInput(config, state, body = {}) {
     namespaces: clusterOk ? live.namespaces : undefined,
     krm: clusterOk ? live.krm : undefined,
     sharing: clusterOk ? live.kai : undefined,
+    quotas: clusterOk ? live.quotas : undefined,
     notes: state.notes,
     base: state.base,
     today: new Date().toLocaleDateString('en-CA'),
