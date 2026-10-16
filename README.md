@@ -124,6 +124,8 @@ Use **Add to the plan** for node pools, departments, projects, and extra queues 
 | **Project** | Name, namespace, department, pool, numbers |
 | **Queue on another pool** | Department or project, second pool, numbers |
 
+To put an existing project on more pools from its own row, click **node pools…** under its name: tick a pool to add a queue there, untick a planned one to take it back. Queues already in the source stay ticked, since the tool does not delete.
+
 New queues always include `gpu`, `cpu`, and `memory` (`cpu`/`memory` default to unlimited in the UI). The tool does **not** create namespaces or label nodes — it tells you what is still missing.
 
 `ManagedNodesConfig` and `KRMConfig` are not edited here (whitelist is read for checks only).

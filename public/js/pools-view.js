@@ -6,6 +6,7 @@ import { numberControl } from './controls.js';
 import { plan, session, fid, value, fromCluster, setDrawnShape } from './state.js';
 import { shapeOf } from '/core/ui-helpers.js';
 import { openAddForm, buildAddButtons } from './add-form.js';
+import { openPoolPicker } from './pool-picker.js';
 import {
   poolShouldOpen, deptShouldOpen, watchDisclosure, applyBrowseFilter, setDeptOpen, reveal,
 } from './browse.js';
@@ -238,7 +239,8 @@ function buildProjectRow({ project, q, series }, top) {
   },
     h('div', { class: 'who' },
       h('span', { class: 'name' }, h('span', { class: 'swatch' }), h('span', { class: 'nm' }, project.name), badge(isNewObject('Project', project.name) || isNewQueue(q.name)), flag),
-      h('div', { class: 'sub' }, h('span', { class: 'qname', title: `Queue ${q.name} · namespace ${project.namespace} · ${other.text}` }, where), alsoOn(project, q))),
+      h('div', { class: 'sub' }, h('span', { class: 'qname', title: `Queue ${q.name} · namespace ${project.namespace} · ${other.text}` }, where), alsoOn(project, q),
+        h('button', { type: 'button', class: 'link also pick', title: `Choose which node pools ${project.name} has a queue on`, onclick: (e) => { e.stopPropagation(); openPoolPicker('Project', project.name); } }, 'node pools…'))),
     h('div', { class: 'cell usage' }, gauge, text),
     cell(numberControl({ id: id('gpu', 'deserved'), label: 'Guaranteed', slider: true, max: top, title: 'deserved — cards this project always gets, even when others want them' })),
     cell(numberControl({ id: id('gpu', 'limit'), label: 'Limit', slider: true, max: top, unlimited: true, title: 'limit — the most it may hold when cards are idle; anything above the guarantee can be reclaimed' })),
