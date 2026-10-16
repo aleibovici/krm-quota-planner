@@ -33,3 +33,31 @@ export function cascadeRemoveAdditions(additions, index) {
   }
   return kept;
 }
+
+/**
+ * Which pools an owner (a project or a department) is on, and what each tick
+ * box in the pool picker may do. A queue that is in the source stays: this
+ * tool adds, it does not delete. The queue a new object was created with
+ * stays too, because an object needs at least one. A queue added on its own
+ * can be taken back.
+ *
+ * @returns {{ pool: any, state: 'source'|'first'|'added'|'free'|'blocked', queue?: any, index?: number, why?: string }[]}
+ */
+export function poolChoices(model, additions, ownerKind, owner) {
+  const parent = ownerKind === 'Project' ? model.departments.find((d) => d.name === owner.parent) : null;
+  return model.pools.map((pool) => {
+    const queue = owner.queues.find((q) => q.nodepool === pool.name);
+    if (queue) {
+      const index = additions.findIndex((a) => a.kind === 'Queue' && a.ownerKind === ownerKind && a.owner === owner.name && a.queue.nodepool === pool.name);
+      if (index !== -1) return { pool, state: 'added', queue, index };
+      const own = additions.some((a) => a.kind === ownerKind && a.name === owner.name && a.queues.some((q) => q.nodepool === pool.name));
+      return own
+        ? { pool, state: 'first', queue, why: `${queue.name} is the queue it is being created with — an object needs at least one` }
+        : { pool, state: 'source', queue, why: `${queue.name} is already there — this tool adds queues, it does not remove them` };
+    }
+    if (parent && !parent.queues.some((q) => q.nodepool === pool.name)) {
+      return { pool, state: 'blocked', why: `department ${parent.name} has no queue on ${pool.name} — give it one first` };
+    }
+    return { pool, state: 'free' };
+  });
+}

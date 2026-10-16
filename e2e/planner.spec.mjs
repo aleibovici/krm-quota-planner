@@ -116,6 +116,52 @@ test.describe('GPU quota planner (git mode)', () => {
     await expect(page.getByRole('button', { name: 'Review and commit' })).toBeEnabled();
   });
 
+  test('a project picks the node pools it is on', async ({ page }) => {
+    const dialog = page.locator('#add-dialog');
+    const row = page.locator('.row[data-queue="workspace-rtx"]');
+    await row.getByRole('button', { name: 'node pools…' }).click();
+    await expect(dialog.getByRole('heading', { name: 'Node pools of project workspace' })).toBeVisible();
+    // Its queue in the source cannot be taken away here.
+    const onRtx = dialog.getByRole('checkbox', { name: 'workspace on rtx-pro-6000' });
+    await expect(onRtx).toBeChecked();
+    await expect(onRtx).toBeDisabled();
+    await dialog.getByRole('button', { name: 'Cancel' }).click();
+
+    // A second pool, which the department is given a queue on first.
+    await page.locator('#add-kinds [data-add="NodePool"]').click();
+    await dialog.locator('[name="name"]').fill('h100');
+    await dialog.locator('[name="labelValue"]').fill('h100');
+    await dialog.getByRole('button', { name: 'Add to the plan' }).click();
+    await expect(dialog).toBeHidden();
+    await page.getByRole('button', { name: 'Queue on another pool' }).click();
+    await dialog.locator('[name="owner"]').selectOption('Department/platform');
+    await dialog.locator('[name="pool"]').selectOption('h100');
+    await dialog.getByRole('button', { name: 'Add to the plan' }).click();
+    await expect(dialog).toBeHidden();
+
+    // Now the project can be put on it from its own row.
+    await row.getByRole('button', { name: 'node pools…' }).click();
+    const onH100 = dialog.getByRole('checkbox', { name: 'workspace on h100' });
+    await expect(onH100).toBeEnabled();
+    await onH100.check();
+    await expect(dialog.locator('[name="queue/h100"]')).toHaveValue('workspace-h100');
+    await dialog.locator('[name="deserved/h100"]').fill('2');
+    await dialog.getByRole('button', { name: 'Update the plan' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('#changes')).toContainText('new queue for project workspace: workspace-h100');
+    await expect(page.locator('.row[data-queue="workspace-h100"]')).toBeVisible();
+
+    // And taken off it again: the planned queue goes, the source one stays.
+    await row.getByRole('button', { name: 'node pools…' }).click();
+    await expect(dialog.getByRole('checkbox', { name: 'workspace on h100' })).toBeChecked();
+    await dialog.getByRole('checkbox', { name: 'workspace on h100' }).uncheck();
+    await dialog.getByRole('button', { name: 'Update the plan' }).click();
+    await expect(dialog).toBeHidden();
+    await expect(page.locator('#changes')).not.toContainText('workspace-h100');
+    await expect(page.locator('.row[data-queue="workspace-h100"]')).toHaveCount(0);
+    await expect(page.locator('.row[data-queue="workspace-rtx"]')).toBeVisible();
+  });
+
   test('theme toggle switches color scheme', async ({ page }) => {
     const root = page.locator('html');
     const before = await root.evaluate((el) => el.dataset.theme ?? '');
