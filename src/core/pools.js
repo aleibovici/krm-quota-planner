@@ -5,7 +5,11 @@
 // Pure: the cluster layer turns `kubectl get nodes` into the node records.
 
 /**
- * @typedef {{ name: string, labels: Record<string, string>, cards: number, allocatable: number, product: string, memoryMiB: number|null, ready: boolean }} Node
+ * @typedef {{
+ *   name: string, labels: Record<string, string>, cards: number, allocatable: number, product: string, memoryMiB: number|null, ready: boolean,
+ *   fractionsReady?: boolean|null,   the gpu-fractioning.nvidia.com/Ready condition (KAI's NvFractions mode); null when the node has none
+ *   mig?: boolean                    its GPUs are MIG-partitioned, so there is no whole card for a fraction to be carved from
+ * }} Node
  */
 
 /**
@@ -23,6 +27,9 @@ export function poolOf(nodes, labelKey, labelValue) {
     // An unsettled count may be too low, and must not be used to refuse a plan.
     settled: mine.length > 0 && cards > 0 && allocatable >= cards && mine.every((n) => n.ready),
     nodes: mine.map(({ labels, ...rest }) => rest),
+    // Whether a fraction of a card could run here: see validate's fraction rules.
+    fractionsReady: mine.some((n) => n.fractionsReady === true) ? true : mine.some((n) => n.fractionsReady === false) ? false : null,
+    mig: mine.filter((n) => n.mig).map((n) => n.name),
   };
 }
 
@@ -33,6 +40,8 @@ export function capacityOfPool(pool) {
     allocatable: pool.allocatable,
     settled: pool.settled,
     notReady: pool.nodes.filter((n) => !n.ready).map((n) => n.name),
+    fractionsReady: pool.fractionsReady ?? null,
+    mig: pool.mig ?? [],
   };
 }
 

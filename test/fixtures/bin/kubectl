@@ -8,6 +8,7 @@
 #   queues.json      the scheduler's Queues, with usage      (none if absent)
 #   namespaces.json  namespaces                              (not allowed if absent)
 #   krmconfig.json   KRM's own settings                      (not allowed if absent)
+#   kaiconfig.json   KAI's Config (GPU sharing mode)         (none if absent)
 dir="$FAKE_CLUSTER"
 prev=
 for arg in "$@"; do
@@ -43,6 +44,7 @@ case "$*" in
   *"get nodes -o json"*) have nodes.json ;;
   *"get namespaces -o json"*) need namespaces.json namespaces ;;
   *"get krmconfigs.kai.resources -o json"*) need krmconfig.json krmconfigs ;;
+  *"get configs.kai.scheduler -o json"*) have kaiconfig.json ;;
   *"apply --dry-run=server"*)
     # Demo / offline: accept any planned YAML without a real API server.
     while [ $# -gt 0 ]; do

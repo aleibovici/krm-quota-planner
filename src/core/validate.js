@@ -23,8 +23,9 @@ const amount = (resource, n) => (n === UNLIMITED ? 'unlimited' : UNIT[resource](
 /**
  * @param {import('./tenancy.js').Tenancy} model the tenancy AFTER the planned edits
  * @param {{
- *   capacity?: Record<string, { cards?: number, allocatable?: number, settled?: boolean, notReady?: string[] }>,
- *   live?: Record<string, { allocatedGpu?: number, allocatedNonPreemptibleGpu?: number }>
+ *   capacity?: Record<string, { cards?: number, allocatable?: number, settled?: boolean, notReady?: string[], fractionsReady?: boolean|null, mig?: string[] }>,
+ *   live?: Record<string, { allocatedGpu?: number, allocatedNonPreemptibleGpu?: number }>,
+ *   sharing?: { gpuSharingMode: string|null }|null   KAI's cluster-wide GPU sharing mode, when its Config was read
  * }} [context]
  * @returns {Finding[]}
  */
@@ -184,6 +185,30 @@ export function validate(model, context = {}) {
       if (settled && l !== null && l !== UNLIMITED && l > cards + EPS) {
         add('warning', 'limit-over-capacity', `${q.name}: limit of ${amount('gpu', l)} is more than the pool's ${amount('gpu', cards)}`, { queue: q.name, pool: pool.name });
       }
+    }
+  }
+
+  // --- fractions of a card against what the cluster can share -----------------
+  // KRM takes any number as a quota. Whether a fraction of a card can ever be
+  // claimed is decided elsewhere: KAI's one cluster-wide sharing mode (Config
+  // spec.global.gpuSharingMode), and in NvFractions mode a readiness
+  // condition on each GPU node. A MIG-partitioned node has no whole card to
+  // share. None of it refuses the quota — the fraction just goes unused.
+  const mode = context.sharing?.gpuSharingMode ?? null;
+  for (const q of allQueues) {
+    const gpu = q.resources.gpu;
+    if (!gpu) continue;
+    const parts = ['deserved', 'limit'].filter((f) => typeof gpu[f] === 'number' && gpu[f] !== UNLIMITED && gpu[f] >= 0 && !Number.isInteger(gpu[f]));
+    if (!parts.length) continue;
+    const what = parts.map((f) => `${f === 'deserved' ? 'guarantee' : 'limit'} of ${amount('gpu', gpu[f])}`).join(' and ');
+    const where = { queue: q.name, pool: q.nodepool };
+    const pool = context.capacity?.[q.nodepool];
+    if (mode === 'Disabled') {
+      add('error', 'fraction-disabled', `${q.name}: ${what} is a fraction of a card, but GPU sharing is Disabled on this cluster (KAI Config spec.global.gpuSharingMode) — no workload could ever claim it`, where);
+    } else if (mode === 'NvFractions' && pool?.fractionsReady === false) {
+      add('warning', 'fraction-not-ready', `${q.name}: ${what} is a fraction of a card, but no node in pool ${q.nodepool} is marked ready for GPU fractions (gpu-fractioning.nvidia.com/Ready) — nothing fractional runs there until one is`, where);
+    } else if (pool?.mig?.length) {
+      add('warning', 'fraction-mig', `${q.name}: ${what} is a fraction of a card, but ${pool.mig.join(', ')} in pool ${q.nodepool} ${pool.mig.length === 1 ? 'exposes its GPUs' : 'expose their GPUs'} as MIG slices — there is no whole card for KAI to share, so the fraction cannot be claimed there`, where);
     }
   }
 

@@ -11,6 +11,8 @@ import { parseQuantity } from './core/quantity.js';
 import { poolOf, capacityOfPool } from './core/pools.js';
 
 const GPU = 'nvidia.com/gpu';
+// Set on a GPU node by KAI's gpu-sharing operator, in NvFractions mode only: until it is True no fraction is placed there.
+const FRACTIONS_READY = 'gpu-fractioning.nvidia.com/Ready';
 
 const KRM_KINDS = ['nodepools.kai.resources', 'departments.kai.resources', 'projects.kai.resources'];
 
@@ -65,11 +67,12 @@ export async function readKrmObjects(target = {}) {
  *   pools: Record<string, { cards: number, allocatable: number, settled: boolean, nodes: { name: string, cards: number, allocatable: number, product: string, memoryMiB: number|null, ready: boolean }[] }>,
  *   nodes: import('./core/pools.js').Node[],
  *   namespaces: Record<string, Record<string, string>>|null,   name -> labels; null when they could not be listed
- *   krm: { createNamespaces: boolean|null, namespaceLabelKey: string }|null   what KRM does about a project's namespace; null when its config could not be read
+ *   krm: { createNamespaces: boolean|null, namespaceLabelKey: string }|null,   what KRM does about a project's namespace; null when its config could not be read
+ *   kai: { gpuSharingMode: string|null }|null   how KAI shares cards (Disabled, NonMemoryEnforced, HamiCore, NvFractions); null when its Config could not be read
  * }>}
  */
 export async function readLive(target = {}) {
-  const result = { ok: false, context: target.context ?? '', readAt: new Date().toISOString(), queues: {}, pools: {}, nodes: [], namespaces: null, krm: null };
+  const result = { ok: false, context: target.context ?? '', readAt: new Date().toISOString(), queues: {}, pools: {}, nodes: [], namespaces: null, krm: null, kai: null };
   try {
     if (!target.context) result.context = await currentContext(target);
     const [queues, pools, nodes] = await Promise.all([
@@ -99,9 +102,10 @@ export async function readLive(target = {}) {
 
     // Only needed to say whether a new project's namespace is ready for it;
     // either may be off limits to someone who can still plan quotas.
-    const [namespaces, config] = await Promise.all([
+    const [namespaces, config, kaiConfig] = await Promise.all([
       kubectl(['get', 'namespaces', '-o', 'json'], target).then(JSON.parse, () => null),
       kubectl(['get', 'krmconfigs.kai.resources', '-o', 'json'], target).then(JSON.parse, () => null),
+      kubectl(['get', 'configs.kai.scheduler', '-o', 'json'], target).then(JSON.parse, () => null),
     ]);
     if (namespaces) result.namespaces = Object.fromEntries((namespaces.items ?? []).map((n) => [n.metadata.name, n.metadata.labels ?? {}]));
     const spec = config?.items?.[0]?.spec;
@@ -109,6 +113,8 @@ export async function readLive(target = {}) {
       const creates = spec.projectController?.features?.createNamespaces;
       result.krm = { createNamespaces: typeof creates === 'boolean' ? creates : null, namespaceLabelKey: spec.global?.namespaceProjectLabelKey || 'kai/project' };
     }
+    const kai = kaiConfig?.items?.[0]?.spec;
+    if (kai) result.kai = { gpuSharingMode: sharingMode(kai) };
   } catch (err) {
     result.error = err.message;
   }
@@ -144,6 +150,17 @@ function poolsOf(pools, nodes) {
   return out;
 }
 
+/**
+ * The cluster-wide GPU sharing mode. One preset for the whole cluster; the
+ * deprecated boolean that older installs still carry is read as its two modes.
+ */
+function sharingMode(spec) {
+  const mode = spec.global?.gpuSharingMode;
+  if (typeof mode === 'string' && mode) return mode;
+  const legacy = spec.global?.gpuSharing ?? spec.admission?.gpuSharing;
+  return typeof legacy === 'boolean' ? (legacy ? 'NonMemoryEnforced' : 'Disabled') : null;
+}
+
 /** @returns {import('./core/pools.js').Node} */
 function describeNode(n) {
   const finite = (x) => (Number.isFinite(x) && x > 0 ? x : 0);
@@ -152,6 +169,8 @@ function describeNode(n) {
   const capacity = finite(parseQuantity(n.status?.capacity?.[GPU]));
   const labelled = finite(Number(labels['nvidia.com/gpu.count']));
   const memory = Number(labels['nvidia.com/gpu.memory']);
+  const fractions = (n.status?.conditions ?? []).find((c) => c.type === FRACTIONS_READY);
+  const migStrategy = labels['nvidia.com/mig.strategy'];
   return {
     name: n.metadata.name,
     labels,
@@ -160,6 +179,9 @@ function describeNode(n) {
     product: labels['nvidia.com/gpu.product'] ?? '',
     memoryMiB: Number.isFinite(memory) ? memory : null,
     ready: (n.status?.conditions ?? []).some((c) => c.type === 'Ready' && c.status === 'True') && !n.spec?.unschedulable,
+    fractionsReady: fractions ? fractions.status === 'True' : null,
+    // GPU Feature Discovery says how the GPUs are exposed; a MIG profile among the allocatable resources says it too.
+    mig: (Boolean(migStrategy) && migStrategy !== 'none') || Object.keys(n.status?.allocatable ?? {}).some((k) => k.startsWith('nvidia.com/mig-')),
   };
 }
 
