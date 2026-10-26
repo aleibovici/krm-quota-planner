@@ -48,6 +48,8 @@ If Argo CD or Flux owns the objects, prefer **git** mode — a patch on the clus
 
 **Screenshots / offline demo** (no real cluster): `npm run demo:generate` then `npm run demo` — see [examples/demo/README.md](examples/demo/README.md).
 
+## Usage
+
 ```sh
 npm install
 npm start                      # http://localhost:4780
@@ -197,9 +199,11 @@ Browser tests start a throwaway git repo and planner on port **4791** (`E2E_PORT
 
 Layout: pure rules in `src/core/`; `src/sources.js` + `src/git.js` / `src/cluster.js` for inputs; `src/server.js`; static UI in `public/`. Runtime dependency: [`yaml`](https://eemeli.org/yaml/) (ISC). Tests use a fake `kubectl` in `test/fixtures/bin`.
 
-## Open source
+## License
 
 Released under the **[MIT License](LICENSE)**.
+
+## Contributing
 
 | Topic | Where |
 |---|---|
